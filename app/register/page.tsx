@@ -8,7 +8,7 @@ import { UserRole } from "@/lib/types";
 
 export default function RegisterPage() {
   const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<UserRole>("peserta");
   const [organization, setOrganization] = useState("");
@@ -24,11 +24,15 @@ export default function RegisterPage() {
 
     try {
       const supabase = createClient();
+      const cleanUsername = username.trim().toLowerCase();
+      const syntheticEmail = `${cleanUsername}@festivalgenerus.internal`;
+
       const { data, error } = await supabase.auth.signUp({
-        email,
+        email: syntheticEmail,
         password,
         options: {
           data: {
+            username: cleanUsername,
             full_name: fullName,
             role,
             organization,
@@ -39,7 +43,7 @@ export default function RegisterPage() {
       if (error) {
         setErrorMsg(error.message);
       } else {
-        setSuccessMsg("Pendaftaran berhasil! Silakan cek email Anda untuk konfirmasi atau langsung masuk.");
+        setSuccessMsg(`Pendaftaran username "${cleanUsername}" berhasil! Silakan langsung masuk di halaman Login.`);
       }
     } catch (err: any) {
       setErrorMsg(err.message || "Terjadi kesalahan saat pendaftaran");
@@ -59,7 +63,7 @@ export default function RegisterPage() {
             <span className="font-bold text-xl text-white">FestivalGenerus</span>
           </Link>
           <h1 className="text-2xl font-bold text-white">Buat Akun Baru</h1>
-          <p className="text-sm text-slate-400 mt-1">Daftar untuk mengelola atau mengikuti perlombaan</p>
+          <p className="text-sm text-slate-400 mt-1">Daftar akun menggunakan Username</p>
         </div>
 
         {errorMsg && (
@@ -96,16 +100,16 @@ export default function RegisterPage() {
 
           <div>
             <label className="block text-xs font-semibold text-slate-300 uppercase tracking-wider mb-1.5">
-              Email
+              Username
             </label>
             <div className="relative">
-              <Mail className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
+              <User className="w-5 h-5 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
               <input
-                type="email"
+                type="text"
                 required
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                placeholder="nama@email.com"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+                placeholder="misal: superadminaldi"
                 className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-10 pr-4 py-2.5 text-sm text-slate-100 focus:outline-none focus:border-emerald-500 transition-colors"
               />
             </div>
