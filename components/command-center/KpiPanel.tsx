@@ -1,29 +1,39 @@
 "use client";
 
-import { CheckSquare, Users, Trophy, DollarSign, Activity } from "lucide-react";
-import { FestivalEvent, Task } from "@/lib/types";
+import { CheckSquare, Users, Trophy, DollarSign, Activity, Award, UserCheck } from "lucide-react";
+import { FestivalEvent, Task, Participant, Competition } from "@/lib/types";
 
 interface KpiPanelProps {
   event: FestivalEvent;
   readinessPercentage: number;
   tasks: Task[];
-  participantCount?: number;
-  competitionCount?: number;
+  participants: Participant[];
+  competitions: Competition[];
 }
 
 export function KpiPanel({
   event,
   readinessPercentage,
   tasks,
-  participantCount = 200,
-  competitionCount = 8,
+  participants,
+  competitions,
 }: KpiPanelProps) {
   const completedTasks = tasks.filter(t => t.status === "DONE").length;
   const totalTasks = tasks.length;
   const taskPct = totalTasks ? Math.round((completedTasks / totalTasks) * 100) : 0;
 
+  // Participant Metrics (Part 2 Integration)
+  const registeredCount = participants.length;
+  const verifiedCount = participants.filter(p => p.status === "VERIFICATION" || p.status === "APPROVED" || p.status === "CHECK_IN").length;
+  const approvedCount = participants.filter(p => p.status === "APPROVED" || p.status === "CHECK_IN").length;
+
+  // Competition Status Breakdown (Part 2 Integration)
+  const openCompCount = competitions.filter(c => c.status === "OPEN").length;
+  const readyCompCount = competitions.filter(c => c.status === "READY" || c.status === "RUNNING").length;
+  const draftCompCount = competitions.filter(c => c.status === "DRAFT").length;
+
   return (
-    <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-4">
+    <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-5 gap-4">
       {/* KPI 1: EVENT READINESS */}
       <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-emerald-500/50 transition-colors">
         <div className="flex items-center justify-between text-slate-400">
@@ -38,27 +48,34 @@ export function KpiPanel({
         </div>
       </div>
 
-      {/* KPI 2: PARTICIPANTS */}
+      {/* KPI 2: PARTICIPANTS ENGINE (PART 2 INTEGRATED) */}
       <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-teal-500/50 transition-colors">
         <div className="flex items-center justify-between text-slate-400">
           <span className="text-xs font-bold uppercase tracking-wider">PARTICIPANTS</span>
-          <Users className="w-4 h-4 text-teal-400" />
+          <UserCheck className="w-4 h-4 text-teal-400" />
         </div>
         <div className="mt-4">
-          <div className="text-3xl font-extrabold text-white font-mono">{participantCount}</div>
-          <div className="text-[11px] text-slate-400 mt-1">Terdaftar Dari 12 Desa</div>
+          <div className="text-2xl font-extrabold text-white font-mono flex items-baseline gap-1">
+            <span>{registeredCount}</span>
+            <span className="text-xs font-normal text-slate-400">Registered</span>
+          </div>
+          <div className="text-[11px] text-slate-400 mt-1 flex items-center gap-2 font-mono">
+            <span className="text-teal-300 font-bold">{verifiedCount} Verified</span> • <span className="text-emerald-400 font-bold">{approvedCount} Approved</span>
+          </div>
         </div>
       </div>
 
-      {/* KPI 3: COMPETITIONS */}
+      {/* KPI 3: COMPETITIONS (PART 2 INTEGRATED) */}
       <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-cyan-500/50 transition-colors">
         <div className="flex items-center justify-between text-slate-400">
           <span className="text-xs font-bold uppercase tracking-wider">COMPETITIONS</span>
-          <Trophy className="w-4 h-4 text-cyan-400" />
+          <Award className="w-4 h-4 text-cyan-400" />
         </div>
         <div className="mt-4">
-          <div className="text-3xl font-extrabold text-white font-mono">{competitionCount}</div>
-          <div className="text-[11px] text-slate-400 mt-1">Cabang Lomba Aktif</div>
+          <div className="text-3xl font-extrabold text-white font-mono">{competitions.length}</div>
+          <div className="text-[11px] text-slate-400 mt-1 flex items-center gap-1.5 font-mono">
+            <span className="text-emerald-400 font-bold">{openCompCount} Open</span> • <span className="text-cyan-300 font-bold">{readyCompCount} Ready</span> • <span className="text-slate-400">{draftCompCount} Draft</span>
+          </div>
         </div>
       </div>
 
@@ -77,7 +94,7 @@ export function KpiPanel({
       </div>
 
       {/* KPI 5: BUDGET */}
-      <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-amber-500/50 transition-colors col-span-2 sm:col-span-1">
+      <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl flex flex-col justify-between hover:border-amber-500/50 transition-colors">
         <div className="flex items-center justify-between text-slate-400">
           <span className="text-xs font-bold uppercase tracking-wider">BUDGET EVENT</span>
           <DollarSign className="w-4 h-4 text-amber-400" />

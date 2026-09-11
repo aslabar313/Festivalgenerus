@@ -4,6 +4,11 @@ import {
   CommitteeMember, 
   Task, 
   Risk, 
+  Competition,
+  Participant,
+  Registration,
+  NotificationItem,
+  AuditTrailItem,
   ActionNeededItem, 
   EventHealthDetails 
 } from "./types";
@@ -38,7 +43,7 @@ export const INITIAL_COMMITTEE: CommitteeMember[] = [
   { id: "com-3", event_id: "evt-fg2026", name: "Anisa Fitri", email: "anisa@generus.id", phone: "081311223344", role: "bendahara", status: "ACTIVE", active_tasks_count: 2 },
   { id: "com-4", event_id: "evt-fg2026", name: "Ustadz H. Ahmad", email: "ahmad@generus.id", phone: "081455667788", role: "koordinator", division_id: "div-1", division_name: "Acara", status: "ACTIVE", active_tasks_count: 4 },
   { id: "com-5", event_id: "evt-fg2026", name: "Budi Santoso", email: "budi@generus.id", phone: "081599887766", role: "koordinator", division_id: "div-4", division_name: "Logistik", status: "ACTIVE", active_tasks_count: 6 },
-  { id: "com-6", event_id: "evt-fg2026", name: "Farhan Hakim", email: "farhan@generus.id", phone: "081622334455", role: "panitia", division_id: "div-4", division_name: "Logistik", status: "ACTIVE", active_tasks_count: 2 },
+  { id: "com-6", event_id: "evt-fg2026", name: "Siti Rahma", email: "siti@generus.id", phone: "081622334455", role: "koordinator", division_id: "div-2", division_name: "Registrasi", status: "ACTIVE", active_tasks_count: 3 },
 ];
 
 export const INITIAL_TASKS: Task[] = [
@@ -53,7 +58,7 @@ export const INITIAL_TASKS: Task[] = [
     priority: "CRITICAL",
     status: "IN_PROGRESS",
     start_date: "2026-09-01",
-    deadline: "2026-09-08T00:00:00.000Z", // Overdue task!
+    deadline: "2026-09-08T00:00:00.000Z",
     is_overdue: true,
   },
   {
@@ -67,7 +72,7 @@ export const INITIAL_TASKS: Task[] = [
     priority: "HIGH",
     status: "TODO",
     start_date: "2026-09-05",
-    deadline: "2026-09-12T00:00:00.000Z", // Due soon!
+    deadline: "2026-09-12T00:00:00.000Z",
     is_due_soon: true,
   },
   {
@@ -94,21 +99,8 @@ export const INITIAL_TASKS: Task[] = [
     priority: "CRITICAL",
     status: "BLOCKED",
     start_date: "2026-09-02",
-    deadline: "2026-09-10T00:00:00.000Z", // Overdue & Blocked
+    deadline: "2026-09-10T00:00:00.000Z",
     is_overdue: true,
-  },
-  {
-    id: "tsk-5",
-    event_id: "evt-fg2026",
-    division_id: "div-5",
-    division_name: "Konsumsi",
-    title: "Booking Catering Snack & Makan Juri 3 Hari",
-    description: "Menu khusus juri dan snack peserta cabe rawit",
-    pic_name: "Hj. Maryam",
-    priority: "MEDIUM",
-    status: "DONE",
-    start_date: "2026-09-01",
-    deadline: "2026-09-05T00:00:00.000Z",
   },
 ];
 
@@ -120,7 +112,7 @@ export const INITIAL_RISKS: Risk[] = [
     description: "Daya listrik utama gedung rentan anjlok saat beban puncak sound & AC",
     probability: 4,
     impact: 5,
-    risk_score: 20, // 4 x 5 = 20 (CRITICAL)
+    risk_score: 20,
     severity: "CRITICAL",
     owner_name: "Budi Santoso",
     mitigation: "Sewa genset cadangan 10KVA dengan automatic transfer switch (ATS)",
@@ -133,24 +125,278 @@ export const INITIAL_RISKS: Risk[] = [
     description: "Lebih dari 300 peserta hadir serentak di pagi hari pertama",
     probability: 4,
     impact: 3,
-    risk_score: 12, // 4 x 3 = 12 (HIGH)
+    risk_score: 12,
     severity: "HIGH",
     owner_name: "Siti Rahma",
     mitigation: "Membuka 5 loket barcode scanner & pra-cetak ID card kontingen",
     status: "IDENTIFIED",
   },
+];
+
+// PART 2: COMPETITIONS INITIAL DATA
+export const INITIAL_COMPETITIONS: Competition[] = [
   {
-    id: "rsk-3",
+    id: "cmp-1",
     event_id: "evt-fg2026",
-    title: "Keterlambatan Hadir Dewan Juri Utama",
-    description: "Jadwal juri luar daerah bentrok dengan agenda lainnya",
-    probability: 2,
-    impact: 4,
-    risk_score: 8,
-    severity: "MEDIUM",
-    owner_name: "Ustadz H. Ahmad",
-    mitigation: "Menyiapkan 2 juri cadangan terverifikasi daerah",
-    status: "MITIGATING",
+    name: "Musabaqah Tahfidz Al-Qur'an Juz 30",
+    category: "Cabe Rawit",
+    description: "Lomba hafalan Surat An-Naba s/d An-Naas beserta Tajwid & Makhorijul Huruf",
+    juknis: "1. Peserta wajib hadir 15 menit sebelum tampil. 2. Durasi tampil max 10 menit per peserta. 3. Penilaian: Tajwid (40%), Kelancaran (30%), Adab (30%).",
+    quota: 50,
+    registered_count: 42,
+    duration_minutes: 15,
+    venue: "Panggung Utama Gedung A",
+    status: "OPEN",
+  },
+  {
+    id: "cmp-2",
+    event_id: "evt-fg2026",
+    name: "Lomba Adzan & Iqamah",
+    category: "Cabe Rawit",
+    description: "Lomba mengumandangkan Adzan Subuh & Lafadz Iqamah",
+    juknis: "1. Menggunakan pakaian muslim rapi dan peci. 2. Adzan yang dikumandangkan adalah Adzan Subuh. 3. Penilaian: Lagu & Intonasi (40%), Tajwid (30%), Adab (30%).",
+    quota: 40,
+    registered_count: 35,
+    duration_minutes: 10,
+    venue: "Masjid Agung Generus Area 1",
+    status: "OPEN",
+  },
+  {
+    id: "cmp-3",
+    event_id: "evt-fg2026",
+    name: "Lomba Mewarnai Kaligrafi Islamic",
+    category: "Cabe Rawit",
+    description: "Lomba mewarnai materi kaligrafi kreasi untuk tingkat SD / Cabe Rawit",
+    juknis: "1. Kertas disiapkan panitia. 2. Meja & alat mewarnai (crayons/pensil warna) dibawa peserta. 3. Durasi waktu 90 menit.",
+    quota: 60,
+    registered_count: 58,
+    duration_minutes: 90,
+    venue: "Aula Hall Lt. 2",
+    status: "READY",
+  },
+  {
+    id: "cmp-4",
+    event_id: "evt-fg2026",
+    name: "Musabaqah Tilawatil Qur'an (MTQ)",
+    category: "Pra-Remaja",
+    description: "Lomba membaca Al-Qur'an dengan lagu Mujawwad standar nasional",
+    juknis: "1. Maqra ditentukan saat pengundian nomor urut. 2. Durasi baca 7-8 menit. 3. Penilaian: Tajwid, Lagu, Suara, dan Fashohah.",
+    quota: 30,
+    registered_count: 28,
+    duration_minutes: 15,
+    venue: "Panggung Utama Gedung A",
+    status: "OPEN",
+  },
+  {
+    id: "cmp-5",
+    event_id: "evt-fg2026",
+    name: "Lomba Pidato / Ceramah Agama",
+    category: "Remaja",
+    description: "Lomba dakwah & pidato Bahasa Indonesia tema Pembinaan Generus",
+    juknis: "1. Tema pidato: Pentingnya 6 Thobiat Luhur & Tri Sukses Generus. 2. Durasi 8-10 menit tanpa teks.",
+    quota: 25,
+    registered_count: 22,
+    duration_minutes: 12,
+    venue: "Aula VIP Gedung B",
+    status: "OPEN",
+  },
+  {
+    id: "cmp-6",
+    event_id: "evt-fg2026",
+    name: "Cerdas Cermat Kemuhammadiyahan & Keagamaan",
+    category: "Remaja",
+    description: "Lomba cerdas cermat tim 3 orang materi Al-Qur'an, Hadits, & Fiqih",
+    juknis: "1. Tiap kelompok mengirimkan 1 tim yang terdiri dari 3 peserta. 2. Babak penyisihan tertulis & babak final rebutan.",
+    quota: 16,
+    registered_count: 16,
+    duration_minutes: 60,
+    venue: "Ruang Rapat Utama",
+    status: "DRAFT",
+  },
+];
+
+// PART 2: PARTICIPANTS INITIAL DATA (Single Source of Truth)
+export const INITIAL_PARTICIPANTS: Participant[] = [
+  {
+    id: "part-101",
+    name: "Muhammad Faiz",
+    participant_type: "INDIVIDUAL",
+    category: "Cabe Rawit",
+    school: "TPQ Al-Fattah",
+    group_name: "Desa Kebon Jeruk",
+    phone: "081234111222",
+    email: "faiz@gmail.com",
+    status: "APPROVED",
+    created_at: "2026-08-25T08:00:00Z",
+  },
+  {
+    id: "part-102",
+    name: "Aisyah Humaira",
+    participant_type: "INDIVIDUAL",
+    category: "Cabe Rawit",
+    school: "SDIT Generus Rabbani",
+    group_name: "Desa Sukamaju",
+    phone: "081399887766",
+    email: "aisyah@gmail.com",
+    status: "APPROVED",
+    created_at: "2026-08-26T09:30:00Z",
+  },
+  {
+    id: "part-103",
+    name: "Rizky Ramadhan",
+    participant_type: "INDIVIDUAL",
+    category: "Pra-Remaja",
+    school: "SMP Negeri 1",
+    group_name: "Desa Mekar Sari",
+    phone: "081544332211",
+    email: "rizky@gmail.com",
+    status: "VERIFICATION",
+    created_at: "2026-09-01T14:15:00Z",
+  },
+  {
+    id: "part-104",
+    name: "Fatimah Azzahra",
+    participant_type: "INDIVIDUAL",
+    category: "Remaja",
+    school: "SMA Mutiara",
+    group_name: "Desa Cempaka",
+    phone: "081788776655",
+    email: "fatimah@gmail.com",
+    status: "REGISTERED",
+    created_at: "2026-09-05T11:20:00Z",
+  },
+  {
+    id: "part-105",
+    name: "Tim Cerdas Cermat Desa Kebon Jeruk",
+    participant_type: "GROUP",
+    category: "Remaja",
+    school: "Utusan Kelompok Kebon Jeruk",
+    group_name: "Desa Kebon Jeruk",
+    phone: "081234567890",
+    email: "kontingen.kebonjeruk@generus.id",
+    status: "APPROVED",
+    created_at: "2026-09-02T16:00:00Z",
+  },
+];
+
+// PART 2: REGISTRATIONS INITIAL DATA
+export const INITIAL_REGISTRATIONS: Registration[] = [
+  {
+    id: "reg-101",
+    participant_id: "part-101",
+    participant_name: "Muhammad Faiz",
+    competition_id: "cmp-1",
+    competition_name: "Musabaqah Tahfidz Al-Qur'an Juz 30",
+    registration_number: "REG-2026-001",
+    status: "APPROVED",
+    payment_status: "FREE",
+    registered_at: "2026-08-25T08:00:00Z",
+    verified_at: "2026-08-26T10:00:00Z",
+    approved_at: "2026-08-27T09:00:00Z",
+  },
+  {
+    id: "reg-102",
+    participant_id: "part-101",
+    participant_name: "Muhammad Faiz",
+    competition_id: "cmp-2",
+    competition_name: "Lomba Adzan & Iqamah",
+    registration_number: "REG-2026-002",
+    status: "APPROVED",
+    payment_status: "FREE",
+    registered_at: "2026-08-25T08:10:00Z",
+    verified_at: "2026-08-26T10:00:00Z",
+    approved_at: "2026-08-27T09:00:00Z",
+  },
+  {
+    id: "reg-103",
+    participant_id: "part-102",
+    participant_name: "Aisyah Humaira",
+    competition_id: "cmp-3",
+    competition_name: "Lomba Mewarnai Kaligrafi Islamic",
+    registration_number: "REG-2026-003",
+    status: "APPROVED",
+    payment_status: "FREE",
+    registered_at: "2026-08-26T09:30:00Z",
+    verified_at: "2026-08-27T11:00:00Z",
+    approved_at: "2026-08-28T14:00:00Z",
+  },
+  {
+    id: "reg-104",
+    participant_id: "part-103",
+    participant_name: "Rizky Ramadhan",
+    competition_id: "cmp-4",
+    competition_name: "Musabaqah Tilawatil Qur'an (MTQ)",
+    registration_number: "REG-2026-004",
+    status: "VERIFICATION",
+    payment_status: "FREE",
+    registered_at: "2026-09-01T14:15:00Z",
+  },
+  {
+    id: "reg-105",
+    participant_id: "part-104",
+    participant_name: "Fatimah Azzahra",
+    competition_id: "cmp-5",
+    competition_name: "Lomba Pidato / Ceramah Agama",
+    registration_number: "REG-2026-005",
+    status: "REGISTERED",
+    payment_status: "FREE",
+    registered_at: "2026-09-05T11:20:00Z",
+  },
+];
+
+// PART 2: NOTIFICATIONS INITIAL DATA
+export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
+  {
+    id: "notif-1",
+    title: "Pendaftaran Berhasil Diverifikasi",
+    message: "Berkas peserta Muhammad Faiz untuk Musabaqah Tahfidz Juz 30 telah diverifikasi dan disetujui panitia.",
+    type: "REGISTRATION_APPROVED",
+    is_read: false,
+    created_at: "2026-08-27T09:00:00Z",
+  },
+  {
+    id: "notif-2",
+    title: "Petunjuk Teknis Lomba (Juknis) Rilis",
+    message: "Juknis Lomba Mewarnai Kaligrafi Islamic telah dipublikasikan oleh Divisi Acara.",
+    type: "COMPETITION_APPROACHING",
+    is_read: true,
+    created_at: "2026-09-01T10:00:00Z",
+  },
+];
+
+// PART 2: AUDIT TRAIL INITIAL DATA (WHO, DID WHAT, WHEN, ON WHAT)
+export const INITIAL_AUDIT_TRAIL: AuditTrailItem[] = [
+  {
+    id: "aud-101",
+    who: "Siti Rahma (Registrasi)",
+    did_what: "VERIFIED_PARTICIPANT",
+    when: "2026-08-26 10:00:00",
+    on_what: "Muhammad Faiz (REG-2026-001)",
+    details: "Verifikasi surat utusan desa & tanggal lahir sesuai kriteria Cabe Rawit",
+  },
+  {
+    id: "aud-102",
+    who: "H. Zaki (Ketua)",
+    did_what: "APPROVED_REGISTRATION",
+    when: "2026-08-27 09:00:00",
+    on_what: "Muhammad Faiz (Tahfidz Juz 30)",
+    details: "Persetujuan akhir pendaftaran kontingen",
+  },
+  {
+    id: "aud-103",
+    who: "Ustadz H. Ahmad (Acara)",
+    did_what: "PUBLISHED_JUKNIS",
+    when: "2026-09-01 10:00:00",
+    on_what: "Lomba Mewarnai Kaligrafi Islamic",
+    details: "Unggah tata tertib & kriteria penilaian juri",
+  },
+  {
+    id: "aud-104",
+    who: "Official Desa Kebon Jeruk",
+    did_what: "CREATED_PARTICIPANT",
+    when: "2026-09-02 16:00:00",
+    on_what: "Tim Cerdas Cermat Desa Kebon Jeruk",
+    details: "Input formulir pendaftaran grup cerdas cermat",
   },
 ];
 
@@ -203,7 +449,6 @@ export function calculateEventHealth(tasks: Task[], risks: Risk[], divisions: Di
     status = 'HEALTHY';
   }
 
-  // Calculate readiness score 0-100
   let readiness = taskCompletionPercentage * 0.5 + 40;
   if (overdueCount > 0) readiness -= overdueCount * 8;
   if (criticalRisksCount > 0) readiness -= criticalRisksCount * 12;
@@ -256,23 +501,6 @@ export function generateActionItems(tasks: Task[], risks: Risk[], divisions: Div
         target_tab: 'risks',
         target_id: r.id,
       });
-    }
-  });
-
-  divisions.forEach(d => {
-    if (d.total_tasks && d.completed_tasks !== undefined) {
-      const pct = Math.round((d.completed_tasks / d.total_tasks) * 100);
-      if (pct < 50) {
-        items.push({
-          id: `act-d-${d.id}`,
-          type: 'division_lagging',
-          title: `Divisi ${d.name} Lambat (${pct}% Selesai)`,
-          subtitle: `Koordinator: ${d.coordinator_name || 'Belum ada'} • ${d.completed_tasks}/${d.total_tasks} Tugas`,
-          severity: 'HIGH',
-          target_tab: 'divisions',
-          target_id: d.id,
-        });
-      }
     }
   });
 

@@ -7,10 +7,28 @@ import {
   INITIAL_COMMITTEE, 
   INITIAL_TASKS, 
   INITIAL_RISKS, 
+  INITIAL_COMPETITIONS,
+  INITIAL_PARTICIPANTS,
+  INITIAL_REGISTRATIONS,
+  INITIAL_NOTIFICATIONS,
+  INITIAL_AUDIT_TRAIL,
   calculateEventHealth, 
   generateActionItems 
 } from "@/lib/store";
-import { FestivalEvent, Division, CommitteeMember, Task, Risk } from "@/lib/types";
+import { 
+  FestivalEvent, 
+  Division, 
+  CommitteeMember, 
+  Task, 
+  Risk, 
+  Competition,
+  Participant,
+  Registration,
+  NotificationItem,
+  AuditTrailItem,
+  ParticipantLifecycleStatus,
+  RegistrationStatus
+} from "@/lib/types";
 import { HeaderNav } from "@/components/command-center/HeaderNav";
 import { EventContextBar } from "@/components/command-center/EventContextBar";
 import { EventHealthBanner } from "@/components/command-center/EventHealthBanner";
@@ -21,11 +39,15 @@ import { DivisionsTab } from "@/components/command-center/DivisionsTab";
 import { CommitteeTab } from "@/components/command-center/CommitteeTab";
 import { TasksTab } from "@/components/command-center/TasksTab";
 import { RisksTab } from "@/components/command-center/RisksTab";
-import { AuditLogTab } from "@/components/command-center/AuditLogTab";
-import { Building, Users, CheckSquare, AlertTriangle } from "lucide-react";
+import { CompetitionsTab } from "@/components/command-center/CompetitionsTab";
+import { ParticipantsTab } from "@/components/command-center/ParticipantsTab";
+import { ParticipantDashboardTab } from "@/components/command-center/ParticipantDashboardTab";
+import { NotificationsTab } from "@/components/command-center/NotificationsTab";
+import { AuditTrailTab } from "@/components/command-center/AuditTrailTab";
+import { Building, CheckSquare, Award, UserCheck } from "lucide-react";
 
 export default function CommandCenterDashboard() {
-  // State Management
+  // State Management (Part 1 + Part 2)
   const [events, setEvents] = useState<FestivalEvent[]>([DEFAULT_EVENT]);
   const [currentEvent, setCurrentEvent] = useState<FestivalEvent>(DEFAULT_EVENT);
   const [divisions, setDivisions] = useState<Division[]>(INITIAL_DIVISIONS);
@@ -33,20 +55,27 @@ export default function CommandCenterDashboard() {
   const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
   const [risks, setRisks] = useState<Risk[]>(INITIAL_RISKS);
 
+  // Part 2 States
+  const [competitions, setCompetitions] = useState<Competition[]>(INITIAL_COMPETITIONS);
+  const [participants, setParticipants] = useState<Participant[]>(INITIAL_PARTICIPANTS);
+  const [registrations, setRegistrations] = useState<Registration[]>(INITIAL_REGISTRATIONS);
+  const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
+  const [auditItems, setAuditItems] = useState<AuditTrailItem[]>(INITIAL_AUDIT_TRAIL);
+
   const [activeTab, setActiveTab] = useState<
-    "dashboard" | "events" | "divisions" | "committee" | "tasks" | "risks" | "audit"
+    "dashboard" | "events" | "competitions" | "participants" | "my_portal" | "divisions" | "committee" | "tasks" | "risks" | "notifications" | "audit"
   >("dashboard");
 
   // Calculations
   const eventHealth = calculateEventHealth(tasks, risks, divisions);
   const actionItems = generateActionItems(tasks, risks, divisions);
+  const unreadNotifCount = notifications.filter(n => !n.is_read).length;
 
   // Handlers for Event
   const handleSaveEvent = (updated: FestivalEvent) => {
     setCurrentEvent(updated);
     setEvents(prev => prev.map(e => e.id === updated.id ? updated : e));
   };
-
   const handleCreateEvent = (newEvent: FestivalEvent) => {
     setEvents(prev => [newEvent, ...prev]);
     setCurrentEvent(newEvent);
@@ -72,7 +101,80 @@ export default function CommandCenterDashboard() {
   const handleUpdateRisk = (r: Risk) => setRisks(prev => prev.map(rk => rk.id === r.id ? r : rk));
   const handleDeleteRisk = (id: string) => setRisks(prev => prev.filter(rk => rk.id !== id));
 
-  // Navigation handler from Action Needed Panel
+  // Handlers for Competitions (Part 2)
+  const handleAddCompetition = (cmp: Competition) => {
+    setCompetitions(prev => [...prev, cmp]);
+    addAuditLog("Panitia (Acara)", "CREATED_COMPETITION", cmp.name, `Membuat cabang lomba baru ${cmp.name}`);
+  };
+  const handleUpdateCompetition = (cmp: Competition) => {
+    setCompetitions(prev => prev.map(c => c.id === cmp.id ? cmp : c));
+    addAuditLog("Panitia (Acara)", "UPDATED_COMPETITION", cmp.name, `Memperbarui status/juknis ${cmp.name}`);
+  };
+  const handleDeleteCompetition = (id: string) => setCompetitions(prev => prev.filter(c => c.id !== id));
+
+  // Handlers for Participants & Registrations (Part 2)
+  const handleAddParticipant = (p: Participant, competitionIds: string[]) => {
+    setParticipants(prev => [p, ...prev]);
+
+    // Create 1 Participant -> N Registrations
+    const newRegs: Registration[] = competitionIds.map((cId, idx) => {
+      const cmp = competitions.find(c => c.id === cId);
+      return {
+        id: `reg-${Date.now()}-${idx}`,
+        participant_id: p.id,
+        participant_name: p.name,
+        competition_id: cId,
+        competition_name: cmp?.name || "Lomba",
+        registration_number: `REG-2026-${Math.floor(100 + Math.random() * 900)}`,
+        status: "REGISTERED",
+        payment_status: "FREE",
+        registered_at: new Date().toISOString(),
+      };
+    });
+
+    setRegistrations(prev => [...newRegs, ...prev]);
+    addAuditLog("Official / Peserta", "CREATED_PARTICIPANT", p.name, `Registrasi peserta baru ${p.name} (${p.group_name})`);
+  };
+
+  const handleUpdateParticipantStatus = (participantId: string, status: ParticipantLifecycleStatus) => {
+    setParticipants(prev => prev.map(p => p.id === participantId ? { ...p, status } : p));
+  };
+
+  const handleUpdateRegistrationStatus = (registrationId: string, status: RegistrationStatus) => {
+    setRegistrations(prev => prev.map(r => {
+      if (r.id === registrationId) {
+        return {
+          ...r,
+          status,
+          verified_at: status === "VERIFICATION" || status === "APPROVED" ? new Date().toISOString() : r.verified_at,
+          approved_at: status === "APPROVED" ? new Date().toISOString() : r.approved_at,
+        };
+      }
+      return r;
+    }));
+
+    const reg = registrations.find(r => r.id === registrationId);
+    if (reg) {
+      addAuditLog("Siti Rahma (Registrasi)", `REGISTRATION_${status}`, `${reg.participant_name} (${reg.registration_number})`, `Status pendaftaran diperbarui ke ${status}`);
+    }
+  };
+
+  const addAuditLog = (who: string, did_what: string, on_what: string, details: string) => {
+    const newLog: AuditTrailItem = {
+      id: `aud-${Date.now()}`,
+      who,
+      did_what,
+      when: new Date().toLocaleString("id-ID"),
+      on_what,
+      details,
+    };
+    setAuditItems(prev => [newLog, ...prev]);
+  };
+
+  const handleMarkAllNotifAsRead = () => {
+    setNotifications(prev => prev.map(n => ({ ...n, is_read: true })));
+  };
+
   const handleNavigateTab = (tab: string, targetId?: string) => {
     setActiveTab(tab as any);
   };
@@ -86,8 +188,9 @@ export default function CommandCenterDashboard() {
         onSelectEvent={setCurrentEvent}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        userRole="Ketua Panitia SaaS"
+        userRole="Panitia & System Command"
         userName="H. Zaki"
+        unreadCount={unreadNotifCount}
       />
 
       {/* Main Container */}
@@ -95,106 +198,120 @@ export default function CommandCenterDashboard() {
         {/* Event Context Header */}
         <EventContextBar event={currentEvent} />
 
-        {/* Tab 1: Command Center Dashboard (Default Control Center) */}
+        {/* Tab 1: Command Center Dashboard */}
         {activeTab === "dashboard" && (
           <div className="space-y-6 animate-fade-in">
-            {/* Event Health & Readiness Banner */}
             <EventHealthBanner health={eventHealth} />
 
-            {/* 5 Core KPIs */}
             <KpiPanel
               event={currentEvent}
               readinessPercentage={eventHealth.readiness_percentage}
               tasks={tasks}
+              participants={participants}
+              competitions={competitions}
             />
 
-            {/* CEO Action Panel: WHAT NEEDS MY ATTENTION? */}
             <ActionNeededPanel
               items={actionItems}
               onNavigateTab={handleNavigateTab}
             />
 
-            {/* Overview Grids: Divisions & Urgent Tasks */}
+            {/* Overview Grids: Participants & Competitions Quick Summary */}
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-              {/* Division Overview Card */}
+              {/* Participant Engine Summary */}
               <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="font-bold text-white text-base flex items-center gap-2">
-                    <Building className="w-5 h-5 text-teal-400" /> Status Divisi Panitia
+                    <UserCheck className="w-5 h-5 text-teal-400" /> Ringkasan Registrasi Peserta
                   </h3>
                   <button
-                    onClick={() => setActiveTab("divisions")}
+                    onClick={() => setActiveTab("participants")}
                     className="text-xs text-emerald-400 hover:underline font-semibold"
                   >
-                    Kelola Divisi &rarr;
+                    Buka Engine Peserta &rarr;
                   </button>
                 </div>
 
                 <div className="space-y-3">
-                  {divisions.slice(0, 4).map((d) => {
-                    const total = d.total_tasks || 0;
-                    const completed = d.completed_tasks || 0;
-                    const pct = total ? Math.round((completed / total) * 100) : 0;
-
-                    return (
-                      <div key={d.id} className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
-                        <div className="flex items-center justify-between text-xs">
-                          <span className="font-bold text-white">Divisi {d.name}</span>
-                          <span className="font-mono text-slate-400">{completed}/{total} ({pct}%)</span>
-                        </div>
-                        <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
-                          <div
-                            className={`h-full ${pct >= 80 ? "bg-emerald-400" : pct >= 50 ? "bg-teal-400" : "bg-amber-400"}`}
-                            style={{ width: `${pct}%` }}
-                          />
-                        </div>
+                  {participants.slice(0, 4).map((p) => (
+                    <div key={p.id} className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between gap-3 text-xs">
+                      <div>
+                        <div className="font-bold text-white">{p.name}</div>
+                        <div className="text-[11px] text-slate-400 mt-0.5">{p.group_name} • {p.category}</div>
                       </div>
-                    );
-                  })}
+                      <span className={`px-2.5 py-0.5 rounded text-[10px] uppercase font-extrabold ${
+                        p.status === "APPROVED" ? "bg-emerald-500/20 text-emerald-400" : "bg-teal-500/20 text-teal-300"
+                      }`}>
+                        {p.status}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
 
-              {/* Tasks Engine Quick Card */}
+              {/* Competitions Summary */}
               <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
                 <div className="flex items-center justify-between">
                   <h3 className="font-bold text-white text-base flex items-center gap-2">
-                    <CheckSquare className="w-5 h-5 text-emerald-400" /> Task Critical & Overdue
+                    <Award className="w-5 h-5 text-emerald-400" /> Cabang Perlombaan Aktif
                   </h3>
                   <button
-                    onClick={() => setActiveTab("tasks")}
+                    onClick={() => setActiveTab("competitions")}
                     className="text-xs text-emerald-400 hover:underline font-semibold"
                   >
-                    Buka Task Engine &rarr;
+                    Kelola Lomba &rarr;
                   </button>
                 </div>
 
                 <div className="space-y-3">
-                  {tasks
-                    .filter(t => t.priority === "CRITICAL" || t.is_overdue || t.status === "BLOCKED")
-                    .slice(0, 3)
-                    .map((t) => (
-                      <div key={t.id} className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between gap-3 text-xs">
-                        <div>
-                          <div className="font-bold text-white flex items-center gap-2">
-                            <span>{t.title}</span>
-                            <span className="px-2 py-0.5 rounded text-[9px] font-black bg-rose-500 text-slate-950">
-                              {t.priority}
-                            </span>
-                          </div>
-                          <div className="text-[11px] text-slate-400 mt-0.5">PIC: {t.pic_name} • Divisi {t.division_name}</div>
-                        </div>
-                        <span className="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 font-mono text-[10px] text-amber-400 font-bold shrink-0">
-                          {t.status}
-                        </span>
+                  {competitions.slice(0, 4).map((c) => (
+                    <div key={c.id} className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between gap-3 text-xs">
+                      <div>
+                        <div className="font-bold text-white">{c.name}</div>
+                        <div className="text-[11px] text-slate-400 mt-0.5">{c.category} • Kuota: {c.registered_count || 0}/{c.quota}</div>
                       </div>
-                    ))}
+                      <span className={`px-2 py-0.5 rounded text-[10px] font-extrabold bg-slate-900 border border-slate-800 text-emerald-400`}>
+                        {c.status}
+                      </span>
+                    </div>
+                  ))}
                 </div>
               </div>
             </div>
           </div>
         )}
 
-        {/* Tab 2: Events Configuration */}
+        {/* Tab 2: Competitions */}
+        {activeTab === "competitions" && (
+          <CompetitionsTab
+            competitions={competitions}
+            onAddCompetition={handleAddCompetition}
+            onUpdateCompetition={handleUpdateCompetition}
+            onDeleteCompetition={handleDeleteCompetition}
+          />
+        )}
+
+        {/* Tab 3: Participants */}
+        {activeTab === "participants" && (
+          <ParticipantsTab
+            participants={participants}
+            registrations={registrations}
+            competitions={competitions}
+            onAddParticipant={handleAddParticipant}
+            onUpdateParticipantStatus={handleUpdateParticipantStatus}
+            onUpdateRegistrationStatus={handleUpdateRegistrationStatus}
+          />
+        )}
+
+        {/* Tab 4: Participant Portal */}
+        {activeTab === "my_portal" && (
+          <ParticipantDashboardTab
+            registrations={registrations}
+            competitions={competitions}
+          />
+        )}
+
+        {/* Tab 5: Events */}
         {activeTab === "events" && (
           <EventManagementTab
             currentEvent={currentEvent}
@@ -204,7 +321,7 @@ export default function CommandCenterDashboard() {
           />
         )}
 
-        {/* Tab 3: Divisions */}
+        {/* Tab 6: Divisions */}
         {activeTab === "divisions" && (
           <DivisionsTab
             divisions={divisions}
@@ -214,7 +331,7 @@ export default function CommandCenterDashboard() {
           />
         )}
 
-        {/* Tab 4: Committee */}
+        {/* Tab 7: Committee */}
         {activeTab === "committee" && (
           <CommitteeTab
             committee={committee}
@@ -225,7 +342,7 @@ export default function CommandCenterDashboard() {
           />
         )}
 
-        {/* Tab 5: Tasks Engine */}
+        {/* Tab 8: Tasks Engine */}
         {activeTab === "tasks" && (
           <TasksTab
             tasks={tasks}
@@ -237,7 +354,7 @@ export default function CommandCenterDashboard() {
           />
         )}
 
-        {/* Tab 6: Risk Matrix */}
+        {/* Tab 9: Risk Matrix */}
         {activeTab === "risks" && (
           <RisksTab
             risks={risks}
@@ -248,8 +365,16 @@ export default function CommandCenterDashboard() {
           />
         )}
 
-        {/* Tab 7: Audit Logs */}
-        {activeTab === "audit" && <AuditLogTab />}
+        {/* Tab 10: Notifications */}
+        {activeTab === "notifications" && (
+          <NotificationsTab
+            notifications={notifications}
+            onMarkAllAsRead={handleMarkAllNotifAsRead}
+          />
+        )}
+
+        {/* Tab 11: Audit Trail */}
+        {activeTab === "audit" && <AuditTrailTab auditItems={auditItems} />}
       </main>
     </div>
   );

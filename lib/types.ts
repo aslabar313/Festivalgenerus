@@ -5,6 +5,10 @@ export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 export type RiskSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
 export type EventHealthStatus = 'HEALTHY' | 'ATTENTION REQUIRED' | 'CRITICAL';
 
+export type CompetitionStatus = 'DRAFT' | 'OPEN' | 'CLOSED' | 'READY' | 'RUNNING' | 'FINISHED' | 'PUBLISHED';
+export type RegistrationStatus = 'REGISTERED' | 'VERIFICATION' | 'APPROVED' | 'REJECTED';
+export type ParticipantLifecycleStatus = 'REGISTERED' | 'VERIFICATION' | 'APPROVED' | 'CHECK_IN' | 'COMPETITION' | 'RESULT' | 'CERTIFICATE';
+
 export interface UserProfile {
   id: string;
   email: string;
@@ -19,7 +23,7 @@ export interface FestivalEvent {
   id: string;
   title: string;
   description?: string;
-  start_date: string; // e.g. 2026-12-11
+  start_date: string;
   end_date: string;
   start_time?: string;
   end_time?: string;
@@ -34,7 +38,7 @@ export interface FestivalEvent {
 export interface Division {
   id: string;
   event_id: string;
-  name: string; // Acara, Registrasi, Humas, Logistik, Konsumsi, Dokumentasi, Keamanan
+  name: string;
   description?: string;
   coordinator_id?: string;
   coordinator_name?: string;
@@ -71,7 +75,7 @@ export interface Task {
   priority: TaskPriority;
   status: TaskStatus;
   start_date?: string;
-  deadline: string; // ISO / Date string
+  deadline: string;
   is_overdue?: boolean;
   is_due_soon?: boolean;
   created_by?: string;
@@ -93,9 +97,9 @@ export interface Risk {
   event_id: string;
   title: string;
   description?: string;
-  probability: number; // 1 - 5
-  impact: number; // 1 - 5
-  risk_score: number; // probability * impact (1 - 25)
+  probability: number;
+  impact: number;
+  risk_score: number;
   severity: RiskSeverity;
   owner_id?: string;
   owner_name?: string;
@@ -105,13 +109,80 @@ export interface Risk {
   updated_at?: string;
 }
 
+// PART 2: COMPETITIONS, PARTICIPANTS, REGISTRATIONS, NOTIFICATIONS
+export interface Competition {
+  id: string;
+  event_id: string;
+  name: string; // e.g. Tahfidz Juz 30, Adzan & Iqamah, Mewarnai, Kaligrafi
+  category: string; // Cabe Rawit, Pra-Remaja, Remaja
+  description?: string;
+  juknis?: string; // Petunjuk Teknis & Rules
+  quota: number;
+  registered_count?: number;
+  duration_minutes: number;
+  venue: string;
+  status: CompetitionStatus;
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Participant {
+  id: string;
+  user_id?: string;
+  name: string;
+  participant_type: 'INDIVIDUAL' | 'GROUP' | 'DELEGATION';
+  category: string; // Cabe Rawit, Pra-Remaja, Remaja
+  school?: string; // TPQ / Madrasah / Sekolah
+  group_name: string; // Utusan Kelompok / Desa
+  phone?: string;
+  email?: string;
+  status: ParticipantLifecycleStatus;
+  registrations?: Registration[];
+  created_at?: string;
+  updated_at?: string;
+}
+
+export interface Registration {
+  id: string;
+  participant_id: string;
+  participant_name?: string;
+  competition_id: string;
+  competition_name?: string;
+  registration_number: string; // e.g. REG-2026-001
+  status: RegistrationStatus;
+  payment_status: 'FREE' | 'PAID' | 'PENDING';
+  notes?: string;
+  registered_at: string;
+  verified_at?: string;
+  approved_at?: string;
+}
+
+export interface NotificationItem {
+  id: string;
+  user_id?: string;
+  title: string;
+  message: string;
+  type: 'REGISTRATION_RECEIVED' | 'REGISTRATION_APPROVED' | 'REGISTRATION_REJECTED' | 'COMPETITION_APPROACHING' | 'SCHEDULE_AVAILABLE';
+  is_read: boolean;
+  created_at: string;
+}
+
+export interface AuditTrailItem {
+  id: string;
+  who: string;
+  did_what: string;
+  when: string;
+  on_what: string;
+  details?: string;
+}
+
 export interface ActionNeededItem {
   id: string;
   type: 'overdue_task' | 'critical_risk' | 'due_soon_task' | 'blocked_task' | 'division_lagging';
   title: string;
   subtitle: string;
   severity: 'CRITICAL' | 'HIGH' | 'MEDIUM';
-  target_tab: 'tasks' | 'risks' | 'divisions' | 'committee';
+  target_tab: 'tasks' | 'risks' | 'divisions' | 'committee' | 'participants' | 'competitions';
   target_id?: string;
 }
 
