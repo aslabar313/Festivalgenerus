@@ -7,6 +7,13 @@ import {
   Competition,
   Participant,
   Registration,
+  Criterion,
+  CompetitionJudge,
+  ScoreItem,
+  CompetitionResult,
+  Venue,
+  ScheduleItem,
+  ScheduleConflict,
   NotificationItem,
   AuditTrailItem,
   ActionNeededItem, 
@@ -133,7 +140,6 @@ export const INITIAL_RISKS: Risk[] = [
   },
 ];
 
-// PART 2: COMPETITIONS INITIAL DATA
 export const INITIAL_COMPETITIONS: Competition[] = [
   {
     id: "cmp-1",
@@ -141,7 +147,7 @@ export const INITIAL_COMPETITIONS: Competition[] = [
     name: "Musabaqah Tahfidz Al-Qur'an Juz 30",
     category: "Cabe Rawit",
     description: "Lomba hafalan Surat An-Naba s/d An-Naas beserta Tajwid & Makhorijul Huruf",
-    juknis: "1. Peserta wajib hadir 15 menit sebelum tampil. 2. Durasi tampil max 10 menit per peserta. 3. Penilaian: Tajwid (40%), Kelancaran (30%), Adab (30%).",
+    juknis: "1. Peserta wajib hadir 15 menit sebelum tampil. 2. Durasi tampil max 10 menit. 3. Penilaian: Makharij (30%), Tajwid (30%), Kelancaran (40%).",
     quota: 50,
     registered_count: 42,
     duration_minutes: 15,
@@ -154,7 +160,7 @@ export const INITIAL_COMPETITIONS: Competition[] = [
     name: "Lomba Adzan & Iqamah",
     category: "Cabe Rawit",
     description: "Lomba mengumandangkan Adzan Subuh & Lafadz Iqamah",
-    juknis: "1. Menggunakan pakaian muslim rapi dan peci. 2. Adzan yang dikumandangkan adalah Adzan Subuh. 3. Penilaian: Lagu & Intonasi (40%), Tajwid (30%), Adab (30%).",
+    juknis: "1. Pakaian muslim rapi. 2. Adzan Subuh. 3. Penilaian: Intonasi (40%), Tajwid (30%), Adab (30%).",
     quota: 40,
     registered_count: 35,
     duration_minutes: 10,
@@ -167,55 +173,15 @@ export const INITIAL_COMPETITIONS: Competition[] = [
     name: "Lomba Mewarnai Kaligrafi Islamic",
     category: "Cabe Rawit",
     description: "Lomba mewarnai materi kaligrafi kreasi untuk tingkat SD / Cabe Rawit",
-    juknis: "1. Kertas disiapkan panitia. 2. Meja & alat mewarnai (crayons/pensil warna) dibawa peserta. 3. Durasi waktu 90 menit.",
+    juknis: "1. Kertas disiapkan panitia. 2. Alat warna dari peserta. 3. Durasi 90 menit.",
     quota: 60,
     registered_count: 58,
     duration_minutes: 90,
     venue: "Aula Hall Lt. 2",
     status: "READY",
   },
-  {
-    id: "cmp-4",
-    event_id: "evt-fg2026",
-    name: "Musabaqah Tilawatil Qur'an (MTQ)",
-    category: "Pra-Remaja",
-    description: "Lomba membaca Al-Qur'an dengan lagu Mujawwad standar nasional",
-    juknis: "1. Maqra ditentukan saat pengundian nomor urut. 2. Durasi baca 7-8 menit. 3. Penilaian: Tajwid, Lagu, Suara, dan Fashohah.",
-    quota: 30,
-    registered_count: 28,
-    duration_minutes: 15,
-    venue: "Panggung Utama Gedung A",
-    status: "OPEN",
-  },
-  {
-    id: "cmp-5",
-    event_id: "evt-fg2026",
-    name: "Lomba Pidato / Ceramah Agama",
-    category: "Remaja",
-    description: "Lomba dakwah & pidato Bahasa Indonesia tema Pembinaan Generus",
-    juknis: "1. Tema pidato: Pentingnya 6 Thobiat Luhur & Tri Sukses Generus. 2. Durasi 8-10 menit tanpa teks.",
-    quota: 25,
-    registered_count: 22,
-    duration_minutes: 12,
-    venue: "Aula VIP Gedung B",
-    status: "OPEN",
-  },
-  {
-    id: "cmp-6",
-    event_id: "evt-fg2026",
-    name: "Cerdas Cermat Kemuhammadiyahan & Keagamaan",
-    category: "Remaja",
-    description: "Lomba cerdas cermat tim 3 orang materi Al-Qur'an, Hadits, & Fiqih",
-    juknis: "1. Tiap kelompok mengirimkan 1 tim yang terdiri dari 3 peserta. 2. Babak penyisihan tertulis & babak final rebutan.",
-    quota: 16,
-    registered_count: 16,
-    duration_minutes: 60,
-    venue: "Ruang Rapat Utama",
-    status: "DRAFT",
-  },
 ];
 
-// PART 2: PARTICIPANTS INITIAL DATA (Single Source of Truth)
 export const INITIAL_PARTICIPANTS: Participant[] = [
   {
     id: "part-101",
@@ -241,45 +207,8 @@ export const INITIAL_PARTICIPANTS: Participant[] = [
     status: "APPROVED",
     created_at: "2026-08-26T09:30:00Z",
   },
-  {
-    id: "part-103",
-    name: "Rizky Ramadhan",
-    participant_type: "INDIVIDUAL",
-    category: "Pra-Remaja",
-    school: "SMP Negeri 1",
-    group_name: "Desa Mekar Sari",
-    phone: "081544332211",
-    email: "rizky@gmail.com",
-    status: "VERIFICATION",
-    created_at: "2026-09-01T14:15:00Z",
-  },
-  {
-    id: "part-104",
-    name: "Fatimah Azzahra",
-    participant_type: "INDIVIDUAL",
-    category: "Remaja",
-    school: "SMA Mutiara",
-    group_name: "Desa Cempaka",
-    phone: "081788776655",
-    email: "fatimah@gmail.com",
-    status: "REGISTERED",
-    created_at: "2026-09-05T11:20:00Z",
-  },
-  {
-    id: "part-105",
-    name: "Tim Cerdas Cermat Desa Kebon Jeruk",
-    participant_type: "GROUP",
-    category: "Remaja",
-    school: "Utusan Kelompok Kebon Jeruk",
-    group_name: "Desa Kebon Jeruk",
-    phone: "081234567890",
-    email: "kontingen.kebonjeruk@generus.id",
-    status: "APPROVED",
-    created_at: "2026-09-02T16:00:00Z",
-  },
 ];
 
-// PART 2: REGISTRATIONS INITIAL DATA
 export const INITIAL_REGISTRATIONS: Registration[] = [
   {
     id: "reg-101",
@@ -291,60 +220,79 @@ export const INITIAL_REGISTRATIONS: Registration[] = [
     status: "APPROVED",
     payment_status: "FREE",
     registered_at: "2026-08-25T08:00:00Z",
-    verified_at: "2026-08-26T10:00:00Z",
-    approved_at: "2026-08-27T09:00:00Z",
-  },
-  {
-    id: "reg-102",
-    participant_id: "part-101",
-    participant_name: "Muhammad Faiz",
-    competition_id: "cmp-2",
-    competition_name: "Lomba Adzan & Iqamah",
-    registration_number: "REG-2026-002",
-    status: "APPROVED",
-    payment_status: "FREE",
-    registered_at: "2026-08-25T08:10:00Z",
-    verified_at: "2026-08-26T10:00:00Z",
-    approved_at: "2026-08-27T09:00:00Z",
-  },
-  {
-    id: "reg-103",
-    participant_id: "part-102",
-    participant_name: "Aisyah Humaira",
-    competition_id: "cmp-3",
-    competition_name: "Lomba Mewarnai Kaligrafi Islamic",
-    registration_number: "REG-2026-003",
-    status: "APPROVED",
-    payment_status: "FREE",
-    registered_at: "2026-08-26T09:30:00Z",
-    verified_at: "2026-08-27T11:00:00Z",
-    approved_at: "2026-08-28T14:00:00Z",
-  },
-  {
-    id: "reg-104",
-    participant_id: "part-103",
-    participant_name: "Rizky Ramadhan",
-    competition_id: "cmp-4",
-    competition_name: "Musabaqah Tilawatil Qur'an (MTQ)",
-    registration_number: "REG-2026-004",
-    status: "VERIFICATION",
-    payment_status: "FREE",
-    registered_at: "2026-09-01T14:15:00Z",
-  },
-  {
-    id: "reg-105",
-    participant_id: "part-104",
-    participant_name: "Fatimah Azzahra",
-    competition_id: "cmp-5",
-    competition_name: "Lomba Pidato / Ceramah Agama",
-    registration_number: "REG-2026-005",
-    status: "REGISTERED",
-    payment_status: "FREE",
-    registered_at: "2026-09-05T11:20:00Z",
   },
 ];
 
-// PART 2: NOTIFICATIONS INITIAL DATA
+// PART 3 INITIAL CRITERIA DATA
+export const INITIAL_CRITERIA: Criterion[] = [
+  { id: "crt-1", competition_id: "cmp-1", name: "Makharijul Huruf", weight: 30, max_score: 100 },
+  { id: "crt-2", competition_id: "cmp-1", name: "Tajwid & Hukum Bacaan", weight: 30, max_score: 100 },
+  { id: "crt-3", competition_id: "cmp-1", name: "Fashohah & Kelancaran", weight: 40, max_score: 100 },
+
+  { id: "crt-4", competition_id: "cmp-2", name: "Lagu & Intonasi Adzan", weight: 40, max_score: 100 },
+  { id: "crt-5", competition_id: "cmp-2", name: "Tajwid & Makhorij", weight: 30, max_score: 100 },
+  { id: "crt-6", competition_id: "cmp-2", name: "Adab & Penampilan", weight: 30, max_score: 100 },
+];
+
+// PART 3 INITIAL COMPETITION JUDGES DATA
+export const INITIAL_COMPETITION_JUDGES: CompetitionJudge[] = [
+  { id: "cj-1", competition_id: "cmp-1", competition_name: "Musabaqah Tahfidz Al-Qur'an Juz 30", judge_id: "juri-1", judge_name: "Ustadz Kyai Kholil", status: "CONFIRMED" },
+  { id: "cj-2", competition_id: "cmp-1", competition_name: "Musabaqah Tahfidz Al-Qur'an Juz 30", judge_id: "juri-2", judge_name: "Ustadz H. Mansyur", status: "CONFIRMED" },
+  { id: "cj-3", competition_id: "cmp-2", competition_name: "Lomba Adzan & Iqamah", judge_id: "juri-3", judge_name: "Ustadz Bilal Ramadhan", status: "CONFIRMED" },
+];
+
+// PART 3 INITIAL SCORES DATA
+export const INITIAL_SCORES: ScoreItem[] = [
+  { id: "sc-1", competition_id: "cmp-1", participant_id: "part-101", judge_id: "juri-1", judge_name: "Ustadz Kyai Kholil", criterion_id: "crt-1", criterion_name: "Makharijul Huruf", score: 95, notes: "Makhraj sangat tajam", is_locked: true, submitted_at: "2026-09-11T09:00:00Z", locked_at: "2026-09-11T09:05:00Z" },
+  { id: "sc-2", competition_id: "cmp-1", participant_id: "part-101", judge_id: "juri-1", judge_name: "Ustadz Kyai Kholil", criterion_id: "crt-2", criterion_name: "Tajwid & Hukum Bacaan", score: 90, notes: "Ghunnah sempurna", is_locked: true, submitted_at: "2026-09-11T09:00:00Z", locked_at: "2026-09-11T09:05:00Z" },
+  { id: "sc-3", competition_id: "cmp-1", participant_id: "part-101", judge_id: "juri-1", judge_name: "Ustadz Kyai Kholil", criterion_id: "crt-3", criterion_name: "Fashohah & Kelancaran", score: 96, notes: "Tanpa terhenti", is_locked: true, submitted_at: "2026-09-11T09:00:00Z", locked_at: "2026-09-11T09:05:00Z" },
+
+  { id: "sc-4", competition_id: "cmp-1", participant_id: "part-102", judge_id: "juri-1", judge_name: "Ustadz Kyai Kholil", criterion_id: "crt-1", criterion_name: "Makharijul Huruf", score: 90, notes: "Bagus", is_locked: false, submitted_at: "2026-09-11T09:30:00Z" },
+  { id: "sc-5", competition_id: "cmp-1", participant_id: "part-102", judge_id: "juri-1", judge_name: "Ustadz Kyai Kholil", criterion_id: "crt-2", criterion_name: "Tajwid & Hukum Bacaan", score: 88, notes: "Cukup", is_locked: false, submitted_at: "2026-09-11T09:30:00Z" },
+  { id: "sc-6", competition_id: "cmp-1", participant_id: "part-102", judge_id: "juri-1", judge_name: "Ustadz Kyai Kholil", criterion_id: "crt-3", criterion_name: "Fashohah & Kelancaran", score: 92, notes: "Lancar", is_locked: false, submitted_at: "2026-09-11T09:30:00Z" },
+];
+
+// PART 3 INITIAL VENUES DATA
+export const INITIAL_VENUES: Venue[] = [
+  { id: "vn-1", name: "Panggung Utama Gedung A", location: "Gedung Utama Lt. 1", capacity: 300, status: "AVAILABLE" },
+  { id: "vn-2", name: "Masjid Agung Generus Area 1", location: "Kompleks Masjid", capacity: 200, status: "AVAILABLE" },
+  { id: "vn-3", name: "Aula Hall Lt. 2", location: "Gedung B Lt. 2", capacity: 150, status: "AVAILABLE" },
+];
+
+// PART 3 INITIAL SCHEDULES DATA
+export const INITIAL_SCHEDULES: ScheduleItem[] = [
+  {
+    id: "sch-1",
+    competition_id: "cmp-1",
+    competition_name: "Musabaqah Tahfidz Al-Qur'an Juz 30",
+    venue_id: "vn-1",
+    venue_name: "Panggung Utama Gedung A",
+    start_time: "2026-12-11T08:00:00.000Z",
+    end_time: "2026-12-11T11:00:00.000Z",
+    status: "SCHEDULED",
+  },
+  {
+    id: "sch-2",
+    competition_id: "cmp-2",
+    competition_name: "Lomba Adzan & Iqamah",
+    venue_id: "vn-2",
+    venue_name: "Masjid Agung Generus Area 1",
+    start_time: "2026-12-11T08:30:00.000Z",
+    end_time: "2026-12-11T10:30:00.000Z",
+    status: "SCHEDULED",
+  },
+  {
+    id: "sch-3",
+    competition_id: "cmp-3",
+    competition_name: "Lomba Mewarnai Kaligrafi Islamic",
+    venue_id: "vn-3",
+    venue_name: "Aula Hall Lt. 2",
+    start_time: "2026-12-11T13:00:00.000Z",
+    end_time: "2026-12-11T15:00:00.000Z",
+    status: "SCHEDULED",
+  },
+];
+
 export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
     id: "notif-1",
@@ -354,17 +302,8 @@ export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     is_read: false,
     created_at: "2026-08-27T09:00:00Z",
   },
-  {
-    id: "notif-2",
-    title: "Petunjuk Teknis Lomba (Juknis) Rilis",
-    message: "Juknis Lomba Mewarnai Kaligrafi Islamic telah dipublikasikan oleh Divisi Acara.",
-    type: "COMPETITION_APPROACHING",
-    is_read: true,
-    created_at: "2026-09-01T10:00:00Z",
-  },
 ];
 
-// PART 2: AUDIT TRAIL INITIAL DATA (WHO, DID WHAT, WHEN, ON WHAT)
 export const INITIAL_AUDIT_TRAIL: AuditTrailItem[] = [
   {
     id: "aud-101",
@@ -372,33 +311,102 @@ export const INITIAL_AUDIT_TRAIL: AuditTrailItem[] = [
     did_what: "VERIFIED_PARTICIPANT",
     when: "2026-08-26 10:00:00",
     on_what: "Muhammad Faiz (REG-2026-001)",
-    details: "Verifikasi surat utusan desa & tanggal lahir sesuai kriteria Cabe Rawit",
-  },
-  {
-    id: "aud-102",
-    who: "H. Zaki (Ketua)",
-    did_what: "APPROVED_REGISTRATION",
-    when: "2026-08-27 09:00:00",
-    on_what: "Muhammad Faiz (Tahfidz Juz 30)",
-    details: "Persetujuan akhir pendaftaran kontingen",
-  },
-  {
-    id: "aud-103",
-    who: "Ustadz H. Ahmad (Acara)",
-    did_what: "PUBLISHED_JUKNIS",
-    when: "2026-09-01 10:00:00",
-    on_what: "Lomba Mewarnai Kaligrafi Islamic",
-    details: "Unggah tata tertib & kriteria penilaian juri",
-  },
-  {
-    id: "aud-104",
-    who: "Official Desa Kebon Jeruk",
-    did_what: "CREATED_PARTICIPANT",
-    when: "2026-09-02 16:00:00",
-    on_what: "Tim Cerdas Cermat Desa Kebon Jeruk",
-    details: "Input formulir pendaftaran grup cerdas cermat",
+    details: "Verifikasi surat utusan desa & tanggal lahir",
   },
 ];
+
+// CALCULATE WEIGHTED TOTAL SCORE FORMULA
+export function calculateWeightedTotalScore(scores: ScoreItem[], criteria: Criterion[]): number {
+  if (!scores.length || !criteria.length) return 0;
+  let totalWeightedScore = 0;
+  let totalWeight = 0;
+
+  criteria.forEach(crt => {
+    const crtScores = scores.filter(s => s.criterion_id === crt.id);
+    if (crtScores.length > 0) {
+      const avgScore = crtScores.reduce((acc, curr) => acc + curr.score, 0) / crtScores.length;
+      totalWeightedScore += (avgScore * (crt.weight / 100));
+      totalWeight += crt.weight;
+    }
+  });
+
+  return Math.round(totalWeightedScore * 100) / 100;
+}
+
+// CONFLICT DETECTION ENGINE FOR SCHEDULING (VENUE, JUDGE, PARTICIPANT TIME OVERLAPS)
+export function detectScheduleConflicts(
+  schedules: ScheduleItem[],
+  competitionJudges: CompetitionJudge[],
+  registrations: Registration[]
+): ScheduleConflict[] {
+  const conflicts: ScheduleConflict[] = [];
+
+  for (let i = 0; i < schedules.length; i++) {
+    for (let j = i + 1; j < schedules.length; j++) {
+      const s1 = schedules[i];
+      const s2 = schedules[j];
+
+      const s1Start = new Date(s1.start_time).getTime();
+      const s1End = new Date(s1.end_time).getTime();
+      const s2Start = new Date(s2.start_time).getTime();
+      const s2End = new Date(s2.end_time).getTime();
+
+      // Check time overlap: s1Start < s2End && s1End > s2Start
+      const timeOverlaps = s1Start < s2End && s1End > s2Start;
+
+      if (timeOverlaps) {
+        // 1. Venue Conflict
+        if (s1.venue_id === s2.venue_id) {
+          conflicts.push({
+            id: `c-vn-${s1.id}-${s2.id}`,
+            type: "VENUE",
+            title: `Bentrok Gedung / Venue: ${s1.venue_name}`,
+            details: `Lomba "${s1.competition_name}" dan "${s2.competition_name}" dijadwalkan di tempat & jam yang sama!`,
+            start_time: s1.start_time,
+            end_time: s1.end_time,
+            severity: "CRITICAL",
+          });
+        }
+
+        // 2. Judge Conflict
+        const s1Judges = competitionJudges.filter(cj => cj.competition_id === s1.competition_id).map(cj => cj.judge_id);
+        const s2Judges = competitionJudges.filter(cj => cj.competition_id === s2.competition_id).map(cj => cj.judge_id);
+        const sharedJudges = s1Judges.filter(jId => s2Judges.includes(jId));
+
+        if (sharedJudges.length > 0) {
+          conflicts.push({
+            id: `c-jd-${s1.id}-${s2.id}`,
+            type: "JUDGE",
+            title: `Bentrok Dewan Juri Terdaftar`,
+            details: `Juri yang sama ditugaskan menilai "${s1.competition_name}" dan "${s2.competition_name}" pada jam yang bersamaan!`,
+            start_time: s1.start_time,
+            end_time: s1.end_time,
+            severity: "CRITICAL",
+          });
+        }
+
+        // 3. Participant Conflict
+        const s1Parts = registrations.filter(r => r.competition_id === s1.competition_id).map(r => r.participant_id);
+        const s2Parts = registrations.filter(r => r.competition_id === s2.competition_id).map(r => r.participant_id);
+        const sharedParts = s1Parts.filter(pId => s2Parts.includes(pId));
+
+        if (sharedParts.length > 0) {
+          conflicts.push({
+            id: `c-pt-${s1.id}-${s2.id}`,
+            type: "PARTICIPANT",
+            title: `Bentrok Jadwal Tampil Peserta`,
+            details: `Terdapat ${sharedParts.length} peserta yang terdaftar di dua cabang lomba sekaligus pada jam bersamaan!`,
+            start_time: s1.start_time,
+            end_time: s1.end_time,
+            severity: "CRITICAL",
+          });
+        }
+      }
+    }
+  }
+
+  return conflicts;
+}
 
 export function calculateEventHealth(tasks: Task[], risks: Risk[], divisions: Division[]): EventHealthDetails {
   const overdueCount = tasks.filter(t => t.is_overdue || (t.status !== 'DONE' && new Date(t.deadline).getTime() < new Date().getTime())).length;

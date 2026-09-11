@@ -109,14 +109,13 @@ export interface Risk {
   updated_at?: string;
 }
 
-// PART 2: COMPETITIONS, PARTICIPANTS, REGISTRATIONS, NOTIFICATIONS
 export interface Competition {
   id: string;
   event_id: string;
-  name: string; // e.g. Tahfidz Juz 30, Adzan & Iqamah, Mewarnai, Kaligrafi
-  category: string; // Cabe Rawit, Pra-Remaja, Remaja
+  name: string;
+  category: string;
   description?: string;
-  juknis?: string; // Petunjuk Teknis & Rules
+  juknis?: string;
   quota: number;
   registered_count?: number;
   duration_minutes: number;
@@ -131,9 +130,9 @@ export interface Participant {
   user_id?: string;
   name: string;
   participant_type: 'INDIVIDUAL' | 'GROUP' | 'DELEGATION';
-  category: string; // Cabe Rawit, Pra-Remaja, Remaja
-  school?: string; // TPQ / Madrasah / Sekolah
-  group_name: string; // Utusan Kelompok / Desa
+  category: string;
+  school?: string;
+  group_name: string;
   phone?: string;
   email?: string;
   status: ParticipantLifecycleStatus;
@@ -148,13 +147,86 @@ export interface Registration {
   participant_name?: string;
   competition_id: string;
   competition_name?: string;
-  registration_number: string; // e.g. REG-2026-001
+  registration_number: string;
   status: RegistrationStatus;
   payment_status: 'FREE' | 'PAID' | 'PENDING';
   notes?: string;
   registered_at: string;
   verified_at?: string;
   approved_at?: string;
+}
+
+// PART 3: CRITERIA, JUDGES, SCORING, RESULTS, SCHEDULING, CONFLICTS
+export interface Criterion {
+  id: string;
+  competition_id: string;
+  name: string; // e.g. Makharijul Huruf, Tajwid, Kelancaran
+  weight: number; // e.g. 30 (%)
+  max_score: number; // e.g. 100
+}
+
+export interface CompetitionJudge {
+  id: string;
+  competition_id: string;
+  competition_name?: string;
+  judge_id: string;
+  judge_name: string;
+  status: 'ASSIGNED' | 'CONFIRMED' | 'MISSING';
+}
+
+export interface ScoreItem {
+  id: string;
+  competition_id: string;
+  participant_id: string;
+  judge_id: string;
+  judge_name?: string;
+  criterion_id: string;
+  criterion_name?: string;
+  score: number;
+  notes?: string;
+  is_locked: boolean;
+  submitted_at: string;
+  locked_at?: string;
+}
+
+export interface CompetitionResult {
+  id: string;
+  competition_id: string;
+  participant_id: string;
+  participant_name: string;
+  group_name: string;
+  total_score: number;
+  rank: number;
+  status: 'DRAFT' | 'FINAL' | 'PUBLISHED';
+}
+
+export interface Venue {
+  id: string;
+  name: string;
+  location: string;
+  capacity: number;
+  status: 'AVAILABLE' | 'OCCUPIED' | 'MAINTENANCE';
+}
+
+export interface ScheduleItem {
+  id: string;
+  competition_id: string;
+  competition_name?: string;
+  venue_id: string;
+  venue_name?: string;
+  start_time: string; // e.g. 2026-12-11T08:00:00Z
+  end_time: string; // e.g. 2026-12-11T09:30:00Z
+  status: 'SCHEDULED' | 'RUNNING' | 'FINISHED' | 'CANCELLED';
+}
+
+export interface ScheduleConflict {
+  id: string;
+  type: 'VENUE' | 'JUDGE' | 'PARTICIPANT';
+  title: string;
+  details: string;
+  start_time: string;
+  end_time: string;
+  severity: 'CRITICAL';
 }
 
 export interface NotificationItem {
@@ -178,11 +250,11 @@ export interface AuditTrailItem {
 
 export interface ActionNeededItem {
   id: string;
-  type: 'overdue_task' | 'critical_risk' | 'due_soon_task' | 'blocked_task' | 'division_lagging';
+  type: 'overdue_task' | 'critical_risk' | 'due_soon_task' | 'blocked_task' | 'division_lagging' | 'schedule_conflict';
   title: string;
   subtitle: string;
   severity: 'CRITICAL' | 'HIGH' | 'MEDIUM';
-  target_tab: 'tasks' | 'risks' | 'divisions' | 'committee' | 'participants' | 'competitions';
+  target_tab: 'tasks' | 'risks' | 'divisions' | 'committee' | 'participants' | 'competitions' | 'scoring' | 'schedules';
   target_id?: string;
 }
 
