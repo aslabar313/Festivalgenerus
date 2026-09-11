@@ -33,8 +33,8 @@ CREATE TABLE public.events (
 CREATE TABLE public.categories (
   id UUID DEFAULT gen_random_uuid() PRIMARY KEY,
   event_id UUID REFERENCES public.events(id) ON DELETE CASCADE,
-  name TEXT NOT NULL, -- e.g. Tahfidz, Adzan, Mewarnai, Ceramah
-  target_age TEXT NOT NULL, -- Cabe Rawit, Pra-Remaja, Remaja
+  name TEXT NOT NULL,
+  target_age TEXT NOT NULL,
   max_participants INT DEFAULT 100,
   created_at TIMESTAMPTZ DEFAULT NOW()
 );
@@ -47,7 +47,7 @@ CREATE TABLE public.participants (
   name TEXT NOT NULL,
   age INT NOT NULL,
   gender CHAR(1) CHECK (gender IN ('L', 'P')),
-  group_name TEXT NOT NULL, -- Kelompok / Desa Utusan
+  group_name TEXT NOT NULL,
   registration_status reg_status DEFAULT 'pending',
   score_total NUMERIC DEFAULT 0,
   created_at TIMESTAMPTZ DEFAULT NOW()
