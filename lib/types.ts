@@ -1,4 +1,4 @@
-export type UserRole = 'admin' | 'panitia' | 'juri' | 'peserta';
+export type UserRole = 'admin' | 'panitia' | 'juri' | 'peserta' | 'bendahara';
 export type CommitteeRole = 'ketua' | 'sekretaris' | 'bendahara' | 'koordinator' | 'panitia';
 export type TaskStatus = 'TODO' | 'IN_PROGRESS' | 'BLOCKED' | 'DONE' | 'CANCELLED';
 export type TaskPriority = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
@@ -8,6 +8,8 @@ export type EventHealthStatus = 'HEALTHY' | 'ATTENTION REQUIRED' | 'CRITICAL';
 export type CompetitionStatus = 'DRAFT' | 'OPEN' | 'CLOSED' | 'READY' | 'RUNNING' | 'FINISHED' | 'PUBLISHED';
 export type RegistrationStatus = 'REGISTERED' | 'VERIFICATION' | 'APPROVED' | 'REJECTED';
 export type ParticipantLifecycleStatus = 'REGISTERED' | 'VERIFICATION' | 'APPROVED' | 'CHECK_IN' | 'COMPETITION' | 'RESULT' | 'CERTIFICATE';
+
+export type EventPhase = 'H-30' | 'H-14' | 'H-7' | 'H-3' | 'H-1' | 'H' | 'H+1' | 'H+7';
 
 export interface UserProfile {
   id: string;
@@ -156,13 +158,12 @@ export interface Registration {
   approved_at?: string;
 }
 
-// PART 3: CRITERIA, JUDGES, SCORING, RESULTS, SCHEDULING, CONFLICTS
 export interface Criterion {
   id: string;
   competition_id: string;
-  name: string; // e.g. Makharijul Huruf, Tajwid, Kelancaran
-  weight: number; // e.g. 30 (%)
-  max_score: number; // e.g. 100
+  name: string;
+  weight: number;
+  max_score: number;
 }
 
 export interface CompetitionJudge {
@@ -214,8 +215,8 @@ export interface ScheduleItem {
   competition_name?: string;
   venue_id: string;
   venue_name?: string;
-  start_time: string; // e.g. 2026-12-11T08:00:00Z
-  end_time: string; // e.g. 2026-12-11T09:30:00Z
+  start_time: string;
+  end_time: string;
   status: 'SCHEDULED' | 'RUNNING' | 'FINISHED' | 'CANCELLED';
 }
 
@@ -229,12 +230,62 @@ export interface ScheduleConflict {
   severity: 'CRITICAL';
 }
 
+// PART 4: INCIDENTS, LOGISTICS, FINANCE, DOCUMENTS
+export interface IncidentItem {
+  id: string;
+  title: string;
+  description: string;
+  severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
+  location: string;
+  reported_by: string;
+  assigned_to?: string;
+  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+  resolved_at?: string;
+  created_at: string;
+}
+
+export interface InventoryItem {
+  id: string;
+  name: string;
+  category: string;
+  quantity: number;
+  available_quantity: number;
+  condition: 'GOOD' | 'FAIR' | 'DAMAGED';
+  location: string;
+  pic?: string;
+  status: 'READY' | 'BORROWED' | 'DAMAGED' | 'MISSING' | 'RETURNED';
+}
+
+export interface TransactionItem {
+  id: string;
+  type: 'INCOME' | 'EXPENSE';
+  category: 'Registration' | 'Sponsor' | 'Donation' | 'Consumption' | 'Equipment' | 'Venue' | 'Documentation' | 'Transportation' | 'Other';
+  amount: number;
+  description: string;
+  transaction_date: string;
+  proof_url?: string;
+  created_by?: string;
+  created_by_name?: string;
+  approved_by?: string;
+  status: 'PENDING' | 'APPROVED' | 'REJECTED';
+}
+
+export interface DocumentItem {
+  id: string;
+  name: string;
+  category: 'Proposal' | 'Surat' | 'Juknis' | 'Rundown' | 'Participant List' | 'Judge List' | 'LPJ' | 'Certificate';
+  file_url: string;
+  version: string;
+  uploaded_by?: string;
+  created_at: string;
+}
+
 export interface NotificationItem {
   id: string;
   user_id?: string;
   title: string;
   message: string;
-  type: 'REGISTRATION_RECEIVED' | 'REGISTRATION_APPROVED' | 'REGISTRATION_REJECTED' | 'COMPETITION_APPROACHING' | 'SCHEDULE_AVAILABLE';
+  type: 'REGISTRATION_RECEIVED' | 'REGISTRATION_APPROVED' | 'REGISTRATION_REJECTED' | 'COMPETITION_APPROACHING' | 'SCHEDULE_AVAILABLE' | 'INCIDENT_REPORTED' | 'FINANCE_AWAITING_APPROVAL';
   is_read: boolean;
   created_at: string;
 }
@@ -250,11 +301,11 @@ export interface AuditTrailItem {
 
 export interface ActionNeededItem {
   id: string;
-  type: 'overdue_task' | 'critical_risk' | 'due_soon_task' | 'blocked_task' | 'division_lagging' | 'schedule_conflict';
+  type: 'overdue_task' | 'critical_risk' | 'due_soon_task' | 'blocked_task' | 'division_lagging' | 'schedule_conflict' | 'open_incident' | 'finance_approval';
   title: string;
   subtitle: string;
   severity: 'CRITICAL' | 'HIGH' | 'MEDIUM';
-  target_tab: 'tasks' | 'risks' | 'divisions' | 'committee' | 'participants' | 'competitions' | 'scoring' | 'schedules';
+  target_tab: 'tasks' | 'risks' | 'divisions' | 'committee' | 'participants' | 'competitions' | 'scoring' | 'schedules' | 'live_event' | 'incidents' | 'finance';
   target_id?: string;
 }
 

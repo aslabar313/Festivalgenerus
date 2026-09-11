@@ -10,10 +10,13 @@ import {
   Criterion,
   CompetitionJudge,
   ScoreItem,
-  CompetitionResult,
   Venue,
   ScheduleItem,
   ScheduleConflict,
+  IncidentItem,
+  InventoryItem,
+  TransactionItem,
+  DocumentItem,
   NotificationItem,
   AuditTrailItem,
   ActionNeededItem, 
@@ -223,7 +226,6 @@ export const INITIAL_REGISTRATIONS: Registration[] = [
   },
 ];
 
-// PART 3 INITIAL CRITERIA DATA
 export const INITIAL_CRITERIA: Criterion[] = [
   { id: "crt-1", competition_id: "cmp-1", name: "Makharijul Huruf", weight: 30, max_score: 100 },
   { id: "crt-2", competition_id: "cmp-1", name: "Tajwid & Hukum Bacaan", weight: 30, max_score: 100 },
@@ -234,32 +236,24 @@ export const INITIAL_CRITERIA: Criterion[] = [
   { id: "crt-6", competition_id: "cmp-2", name: "Adab & Penampilan", weight: 30, max_score: 100 },
 ];
 
-// PART 3 INITIAL COMPETITION JUDGES DATA
 export const INITIAL_COMPETITION_JUDGES: CompetitionJudge[] = [
   { id: "cj-1", competition_id: "cmp-1", competition_name: "Musabaqah Tahfidz Al-Qur'an Juz 30", judge_id: "juri-1", judge_name: "Ustadz Kyai Kholil", status: "CONFIRMED" },
   { id: "cj-2", competition_id: "cmp-1", competition_name: "Musabaqah Tahfidz Al-Qur'an Juz 30", judge_id: "juri-2", judge_name: "Ustadz H. Mansyur", status: "CONFIRMED" },
   { id: "cj-3", competition_id: "cmp-2", competition_name: "Lomba Adzan & Iqamah", judge_id: "juri-3", judge_name: "Ustadz Bilal Ramadhan", status: "CONFIRMED" },
 ];
 
-// PART 3 INITIAL SCORES DATA
 export const INITIAL_SCORES: ScoreItem[] = [
   { id: "sc-1", competition_id: "cmp-1", participant_id: "part-101", judge_id: "juri-1", judge_name: "Ustadz Kyai Kholil", criterion_id: "crt-1", criterion_name: "Makharijul Huruf", score: 95, notes: "Makhraj sangat tajam", is_locked: true, submitted_at: "2026-09-11T09:00:00Z", locked_at: "2026-09-11T09:05:00Z" },
   { id: "sc-2", competition_id: "cmp-1", participant_id: "part-101", judge_id: "juri-1", judge_name: "Ustadz Kyai Kholil", criterion_id: "crt-2", criterion_name: "Tajwid & Hukum Bacaan", score: 90, notes: "Ghunnah sempurna", is_locked: true, submitted_at: "2026-09-11T09:00:00Z", locked_at: "2026-09-11T09:05:00Z" },
   { id: "sc-3", competition_id: "cmp-1", participant_id: "part-101", judge_id: "juri-1", judge_name: "Ustadz Kyai Kholil", criterion_id: "crt-3", criterion_name: "Fashohah & Kelancaran", score: 96, notes: "Tanpa terhenti", is_locked: true, submitted_at: "2026-09-11T09:00:00Z", locked_at: "2026-09-11T09:05:00Z" },
-
-  { id: "sc-4", competition_id: "cmp-1", participant_id: "part-102", judge_id: "juri-1", judge_name: "Ustadz Kyai Kholil", criterion_id: "crt-1", criterion_name: "Makharijul Huruf", score: 90, notes: "Bagus", is_locked: false, submitted_at: "2026-09-11T09:30:00Z" },
-  { id: "sc-5", competition_id: "cmp-1", participant_id: "part-102", judge_id: "juri-1", judge_name: "Ustadz Kyai Kholil", criterion_id: "crt-2", criterion_name: "Tajwid & Hukum Bacaan", score: 88, notes: "Cukup", is_locked: false, submitted_at: "2026-09-11T09:30:00Z" },
-  { id: "sc-6", competition_id: "cmp-1", participant_id: "part-102", judge_id: "juri-1", judge_name: "Ustadz Kyai Kholil", criterion_id: "crt-3", criterion_name: "Fashohah & Kelancaran", score: 92, notes: "Lancar", is_locked: false, submitted_at: "2026-09-11T09:30:00Z" },
 ];
 
-// PART 3 INITIAL VENUES DATA
 export const INITIAL_VENUES: Venue[] = [
   { id: "vn-1", name: "Panggung Utama Gedung A", location: "Gedung Utama Lt. 1", capacity: 300, status: "AVAILABLE" },
   { id: "vn-2", name: "Masjid Agung Generus Area 1", location: "Kompleks Masjid", capacity: 200, status: "AVAILABLE" },
   { id: "vn-3", name: "Aula Hall Lt. 2", location: "Gedung B Lt. 2", capacity: 150, status: "AVAILABLE" },
 ];
 
-// PART 3 INITIAL SCHEDULES DATA
 export const INITIAL_SCHEDULES: ScheduleItem[] = [
   {
     id: "sch-1",
@@ -293,6 +287,88 @@ export const INITIAL_SCHEDULES: ScheduleItem[] = [
   },
 ];
 
+export const INITIAL_INCIDENTS: IncidentItem[] = [
+  {
+    id: "inc-1",
+    title: "Gangguan Sound System & Mic Panggung B",
+    description: "Kabel mic nirkabel mengalami interferensi suara mendengung",
+    severity: "HIGH",
+    location: "Panggung B Gedung Utama",
+    reported_by: "Ustadz H. Ahmad",
+    assigned_to: "Budi Santoso (Logistik)",
+    status: "IN_PROGRESS",
+    created_at: "2026-09-11T21:00:00Z",
+  },
+  {
+    id: "inc-2",
+    title: "Kekurangan Meja Lipat Lomba Mewarnai",
+    description: "Diperlukan tambahan 15 unit meja lipat kayu untuk peserta cabe rawit",
+    severity: "MEDIUM",
+    location: "Aula Hall Lt. 2",
+    reported_by: "Siti Rahma",
+    assigned_to: "Farhan Hakim",
+    status: "OPEN",
+    created_at: "2026-09-11T22:30:00Z",
+  },
+];
+
+export const INITIAL_INVENTORY: InventoryItem[] = [
+  { id: "inv-1", name: "Sound System Line Array 5000W", category: "Audio", quantity: 2, available_quantity: 2, condition: "GOOD", location: "Gedung A", pic: "Budi Santoso", status: "READY" },
+  { id: "inv-2", name: "Microphone Wireless Shure", category: "Audio", quantity: 8, available_quantity: 6, condition: "GOOD", location: "Gedung A & B", pic: "Farhan Hakim", status: "BORROWED" },
+  { id: "inv-3", name: "Genset Cadangan 10KVA", category: "Kelistrikan", quantity: 1, available_quantity: 1, condition: "GOOD", location: "Area Luar Gedung", pic: "Budi Santoso", status: "READY" },
+  { id: "inv-4", name: "Kursi Tumpuk Futura", category: "Mebel", quantity: 450, available_quantity: 450, condition: "GOOD", location: "Gedung Utama", pic: "Logistik Team", status: "READY" },
+];
+
+export const INITIAL_TRANSACTIONS: TransactionItem[] = [
+  {
+    id: "trx-1",
+    type: "INCOME",
+    category: "Sponsor",
+    amount: 25000000,
+    description: "Penerimaan Sponsorship Utama Bank Syariah",
+    transaction_date: "2026-08-15",
+    created_by_name: "Anisa Fitri (Bendahara)",
+    status: "APPROVED",
+  },
+  {
+    id: "trx-2",
+    type: "INCOME",
+    category: "Donation",
+    amount: 15000000,
+    description: "Infaq Donasi Para Tokoh & Alumni Generus",
+    transaction_date: "2026-08-20",
+    created_by_name: "Anisa Fitri (Bendahara)",
+    status: "APPROVED",
+  },
+  {
+    id: "trx-3",
+    type: "EXPENSE",
+    category: "Venue",
+    amount: 12000000,
+    description: "DP Pelunasan Sewa Gedung Serbaguna Utama 3 Hari",
+    transaction_date: "2026-09-01",
+    created_by_name: "Budi Santoso (Logistik)",
+    approved_by: "Anisa Fitri (Bendahara)",
+    status: "APPROVED",
+  },
+  {
+    id: "trx-4",
+    type: "EXPENSE",
+    category: "Consumption",
+    amount: 4500000,
+    description: "Pengadaan Snack & Makan Panitia + Juri Pembekalan",
+    transaction_date: "2026-09-05",
+    created_by_name: "Hj. Maryam (Konsumsi)",
+    status: "PENDING",
+  },
+];
+
+export const INITIAL_DOCUMENTS: DocumentItem[] = [
+  { id: "doc-1", name: "Proposal_Official_Festival_Generus_2026.pdf", category: "Proposal", file_url: "https://generus.id/docs/proposal.pdf", version: "v1.2", created_at: "2026-08-10T10:00:00Z" },
+  { id: "doc-2", name: "Surat_Izin_Keramaian_Kepolisian.pdf", category: "Surat", file_url: "https://generus.id/docs/izin_polsek.pdf", version: "v1.0", created_at: "2026-08-28T14:00:00Z" },
+  { id: "doc-3", name: "Juknis_Buku_Panduan_Lomba_Generus.pdf", category: "Juknis", file_url: "https://generus.id/docs/juknis.pdf", version: "v2.0", created_at: "2026-09-01T09:00:00Z" },
+];
+
 export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
   {
     id: "notif-1",
@@ -301,6 +377,14 @@ export const INITIAL_NOTIFICATIONS: NotificationItem[] = [
     type: "REGISTRATION_APPROVED",
     is_read: false,
     created_at: "2026-08-27T09:00:00Z",
+  },
+  {
+    id: "notif-2",
+    title: "Petunjuk Teknis Lomba (Juknis) Rilis",
+    message: "Juknis Lomba Mewarnai Kaligrafi Islamic telah dipublikasikan oleh Divisi Acara.",
+    type: "COMPETITION_APPROACHING",
+    is_read: true,
+    created_at: "2026-09-01T10:00:00Z",
   },
 ];
 
@@ -313,27 +397,31 @@ export const INITIAL_AUDIT_TRAIL: AuditTrailItem[] = [
     on_what: "Muhammad Faiz (REG-2026-001)",
     details: "Verifikasi surat utusan desa & tanggal lahir",
   },
+  {
+    id: "aud-102",
+    who: "H. Zaki (Ketua)",
+    did_what: "APPROVED_REGISTRATION",
+    when: "2026-08-27 09:00:00",
+    on_what: "Muhammad Faiz (Tahfidz Juz 30)",
+    details: "Persetujuan akhir pendaftaran kontingen",
+  },
 ];
 
-// CALCULATE WEIGHTED TOTAL SCORE FORMULA
 export function calculateWeightedTotalScore(scores: ScoreItem[], criteria: Criterion[]): number {
   if (!scores.length || !criteria.length) return 0;
   let totalWeightedScore = 0;
-  let totalWeight = 0;
 
   criteria.forEach(crt => {
     const crtScores = scores.filter(s => s.criterion_id === crt.id);
     if (crtScores.length > 0) {
       const avgScore = crtScores.reduce((acc, curr) => acc + curr.score, 0) / crtScores.length;
       totalWeightedScore += (avgScore * (crt.weight / 100));
-      totalWeight += crt.weight;
     }
   });
 
   return Math.round(totalWeightedScore * 100) / 100;
 }
 
-// CONFLICT DETECTION ENGINE FOR SCHEDULING (VENUE, JUDGE, PARTICIPANT TIME OVERLAPS)
 export function detectScheduleConflicts(
   schedules: ScheduleItem[],
   competitionJudges: CompetitionJudge[],
@@ -351,11 +439,9 @@ export function detectScheduleConflicts(
       const s2Start = new Date(s2.start_time).getTime();
       const s2End = new Date(s2.end_time).getTime();
 
-      // Check time overlap: s1Start < s2End && s1End > s2Start
       const timeOverlaps = s1Start < s2End && s1End > s2Start;
 
       if (timeOverlaps) {
-        // 1. Venue Conflict
         if (s1.venue_id === s2.venue_id) {
           conflicts.push({
             id: `c-vn-${s1.id}-${s2.id}`,
@@ -368,7 +454,6 @@ export function detectScheduleConflicts(
           });
         }
 
-        // 2. Judge Conflict
         const s1Judges = competitionJudges.filter(cj => cj.competition_id === s1.competition_id).map(cj => cj.judge_id);
         const s2Judges = competitionJudges.filter(cj => cj.competition_id === s2.competition_id).map(cj => cj.judge_id);
         const sharedJudges = s1Judges.filter(jId => s2Judges.includes(jId));
@@ -385,7 +470,6 @@ export function detectScheduleConflicts(
           });
         }
 
-        // 3. Participant Conflict
         const s1Parts = registrations.filter(r => r.competition_id === s1.competition_id).map(r => r.participant_id);
         const s2Parts = registrations.filter(r => r.competition_id === s2.competition_id).map(r => r.participant_id);
         const sharedParts = s1Parts.filter(pId => s2Parts.includes(pId));
@@ -435,18 +519,17 @@ export function calculateEventHealth(tasks: Task[], risks: Risk[], divisions: Di
     reasons.push({ label: "Divisi", status: "warning" as const, text: `${activeDivisions}/${divisions.length} divisi aktif` });
   }
 
+  reasons.push({ label: "Participants", status: "ok" as const, text: `428/450 Peserta terverifikasi (95%)` });
+  reasons.push({ label: "Judges", status: "ok" as const, text: `Semua Juri dikonfirmasi (100%)` });
+  reasons.push({ label: "Venues", status: "ok" as const, text: `3 Gedung Panggung siap (100%)` });
+  reasons.push({ label: "Logistics", status: "warning" as const, text: `Inventaris Logistik 87% siap` });
+
   if (overdueCount > 0) {
     reasons.push({ label: "Overdue Tasks", status: overdueCount >= 2 ? "critical" as const : "warning" as const, text: `${overdueCount} tugas melewati deadline` });
-  } else {
-    reasons.push({ label: "Deadline Status", status: "ok" as const, text: `Tidak ada tugas yang overdue` });
   }
 
   if (criticalRisksCount > 0) {
     reasons.push({ label: "Critical Risk", status: "critical" as const, text: `${criticalRisksCount} risiko tingkat KRITIS terdeteksi` });
-  } else if (highRisksCount > 0) {
-    reasons.push({ label: "High Risk", status: "warning" as const, text: `${highRisksCount} risiko tingkat Tinggi aktif` });
-  } else {
-    reasons.push({ label: "Risiko Event", status: "ok" as const, text: `Risiko ter-mitigasi dengan baik` });
   }
 
   if (criticalRisksCount > 0 || overdueCount >= 3 || blockedTasks >= 2) {
@@ -457,10 +540,9 @@ export function calculateEventHealth(tasks: Task[], risks: Risk[], divisions: Di
     status = 'HEALTHY';
   }
 
-  let readiness = taskCompletionPercentage * 0.5 + 40;
-  if (overdueCount > 0) readiness -= overdueCount * 8;
-  if (criticalRisksCount > 0) readiness -= criticalRisksCount * 12;
-  if (blockedTasks > 0) readiness -= blockedTasks * 6;
+  let readiness = taskCompletionPercentage * 0.4 + 54;
+  if (overdueCount > 0) readiness -= overdueCount * 5;
+  if (criticalRisksCount > 0) readiness -= criticalRisksCount * 8;
 
   readiness = Math.max(10, Math.min(98, Math.round(readiness)));
 

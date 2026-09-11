@@ -20,7 +20,10 @@ import {
   Bell,
   FileText,
   Star,
-  Medal
+  Flame,
+  Package,
+  DollarSign,
+  FileSpreadsheet
 } from "lucide-react";
 import { FestivalEvent } from "@/lib/types";
 
@@ -52,18 +55,17 @@ export function HeaderNav({
 
   const navItems = [
     { id: "dashboard", label: "Command Center", icon: LayoutDashboard },
+    { id: "live_event", label: "LIVE EVENT (H)", icon: Flame, highlight: true },
+    { id: "incidents", label: "Incidents", icon: AlertTriangle },
     { id: "judge_panel", label: "Panel Juri Live", icon: Star },
-    { id: "scoring_results", label: "Hasil & Perankingan", icon: Trophy },
-    { id: "schedules", label: "Jadwal & Conflict Engine", icon: Calendar, alert: conflictCount > 0 },
+    { id: "scoring_results", label: "Hasil & Juara", icon: Trophy },
+    { id: "schedules", label: "Jadwal Engine", icon: Calendar, alert: conflictCount > 0 },
     { id: "competitions", label: "Cabang Lomba", icon: Award },
-    { id: "participants", label: "Peserta & Registrasi", icon: UserCheck },
-    { id: "my_portal", label: "Portal Peserta", icon: Users },
-    { id: "divisions", label: "Divisi", icon: Building },
-    { id: "committee", label: "Panitia", icon: Users },
-    { id: "tasks", label: "Task Engine", icon: CheckSquare },
-    { id: "risks", label: "Risk Matrix", icon: AlertTriangle },
-    { id: "notifications", label: "Notifikasi", icon: Bell, badge: unreadCount },
-    { id: "audit", label: "Audit Trail", icon: FileText },
+    { id: "participants", label: "Peserta Engine", icon: UserCheck },
+    { id: "logistics", label: "Logistik", icon: Package },
+    { id: "finance", label: "Finance (Kas)", icon: DollarSign },
+    { id: "documents", label: "Dokumen", icon: FileText },
+    { id: "reports", label: "Reports (LPJ)", icon: FileSpreadsheet },
   ];
 
   return (
@@ -77,10 +79,10 @@ export function HeaderNav({
             </div>
             <div className="hidden sm:block">
               <span className="font-bold text-base text-white tracking-tight block">
-                FestivalGenerus
+                FestivalGenerus OS
               </span>
               <span className="text-[10px] text-emerald-400 font-mono tracking-widest uppercase block -mt-1">
-                JUDGE & SCORING ENGINE
+                PRODUCTION v1.0
               </span>
             </div>
           </Link>
@@ -95,7 +97,7 @@ export function HeaderNav({
               className="flex items-center gap-2 px-3 py-1.5 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg text-xs font-semibold text-slate-200 transition-colors"
             >
               <Calendar className="w-3.5 h-3.5 text-emerald-400" />
-              <span className="max-w-[120px] sm:max-w-[160px] truncate">{currentEvent.title}</span>
+              <span className="max-w-[120px] sm:max-w-[150px] truncate">{currentEvent.title}</span>
               <ChevronDown className="w-3.5 h-3.5 text-slate-400" />
             </button>
 
@@ -138,7 +140,9 @@ export function HeaderNav({
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
                 className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all relative ${
-                  isActive
+                  item.highlight
+                    ? "bg-emerald-500 text-slate-950 font-black shadow-md shadow-emerald-500/30"
+                    : isActive
                     ? "bg-emerald-500/15 text-emerald-400 border border-emerald-500/30 shadow-sm"
                     : "text-slate-400 hover:text-slate-200 hover:bg-slate-800/60"
                 }`}
@@ -147,10 +151,6 @@ export function HeaderNav({
                 <span>{item.label}</span>
                 {item.alert ? (
                   <span className="w-2 h-2 rounded-full bg-rose-500 animate-ping" />
-                ) : item.badge ? (
-                  <span className="px-1.5 py-0.2 rounded-full bg-rose-500 text-slate-950 font-extrabold text-[9px]">
-                    {item.badge}
-                  </span>
                 ) : null}
               </button>
             );
@@ -186,7 +186,7 @@ export function HeaderNav({
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="2xl:hidden bg-slate-900 border-b border-slate-800 px-4 py-3 space-y-1">
+        <div className="2xl:hidden bg-slate-900 border-b border-slate-800 px-4 py-3 space-y-1 max-h-[80vh] overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -198,8 +198,10 @@ export function HeaderNav({
                   setMobileMenuOpen(false);
                 }}
                 className={`w-full flex items-center justify-between px-3 py-2.5 rounded-lg text-xs font-semibold transition-colors ${
-                  isActive
-                    ? "bg-emerald-500 text-slate-950 font-bold"
+                  item.highlight
+                    ? "bg-emerald-500 text-slate-950 font-black"
+                    : isActive
+                    ? "bg-emerald-500/20 text-emerald-400 font-bold"
                     : "text-slate-300 hover:bg-slate-800"
                 }`}
               >
@@ -207,15 +209,6 @@ export function HeaderNav({
                   <Icon className="w-4 h-4" />
                   {item.label}
                 </div>
-                {item.alert ? (
-                  <span className="px-2 py-0.5 rounded-full bg-rose-500 text-slate-950 font-black text-[9px] uppercase">
-                    CONFLICT
-                  </span>
-                ) : item.badge ? (
-                  <span className="px-2 py-0.5 rounded-full bg-rose-500 text-white font-mono text-[10px]">
-                    {item.badge}
-                  </span>
-                ) : null}
               </button>
             );
           })}
