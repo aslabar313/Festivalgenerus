@@ -1,282 +1,256 @@
 "use client";
 
 import { useState } from "react";
-import Link from "next/link";
 import { 
-  Trophy, 
-  Users, 
-  Award, 
-  Calendar, 
-  Plus, 
-  Search, 
-  LogOut, 
-  UserCheck, 
-  FileText, 
-  CheckCircle,
-  Clock,
-  Sparkles
-} from "lucide-react";
+  DEFAULT_EVENT, 
+  INITIAL_DIVISIONS, 
+  INITIAL_COMMITTEE, 
+  INITIAL_TASKS, 
+  INITIAL_RISKS, 
+  calculateEventHealth, 
+  generateActionItems 
+} from "@/lib/store";
+import { FestivalEvent, Division, CommitteeMember, Task, Risk } from "@/lib/types";
+import { HeaderNav } from "@/components/command-center/HeaderNav";
+import { EventContextBar } from "@/components/command-center/EventContextBar";
+import { EventHealthBanner } from "@/components/command-center/EventHealthBanner";
+import { KpiPanel } from "@/components/command-center/KpiPanel";
+import { ActionNeededPanel } from "@/components/command-center/ActionNeededPanel";
+import { EventManagementTab } from "@/components/command-center/EventManagementTab";
+import { DivisionsTab } from "@/components/command-center/DivisionsTab";
+import { CommitteeTab } from "@/components/command-center/CommitteeTab";
+import { TasksTab } from "@/components/command-center/TasksTab";
+import { RisksTab } from "@/components/command-center/RisksTab";
+import { AuditLogTab } from "@/components/command-center/AuditLogTab";
+import { Building, Users, CheckSquare, AlertTriangle } from "lucide-react";
 
-export default function DashboardPage() {
-  const [activeTab, setActiveTab] = useState<"events" | "participants" | "scoring">("events");
+export default function CommandCenterDashboard() {
+  // State Management
+  const [events, setEvents] = useState<FestivalEvent[]>([DEFAULT_EVENT]);
+  const [currentEvent, setCurrentEvent] = useState<FestivalEvent>(DEFAULT_EVENT);
+  const [divisions, setDivisions] = useState<Division[]>(INITIAL_DIVISIONS);
+  const [committee, setCommittee] = useState<CommitteeMember[]>(INITIAL_COMMITTEE);
+  const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
+  const [risks, setRisks] = useState<Risk[]>(INITIAL_RISKS);
 
-  // Sample data for initial preview
-  const events = [
-    { id: "1", title: "Festival Generus Daerah 2026", date: "15-17 Oktober 2026", participants: 142, status: "Aktif", location: "Gedung Serbaguna Daerah" },
-    { id: "2", title: "Musabaqah Tahfidz Cabe Rawit", date: "20 November 2026", participants: 58, status: "Mendatang", location: "Masjid Al-Fattah" },
-  ];
+  const [activeTab, setActiveTab] = useState<
+    "dashboard" | "events" | "divisions" | "committee" | "tasks" | "risks" | "audit"
+  >("dashboard");
 
-  const participants = [
-    { id: "P001", name: "Muhammad Faiz", category: "Tahfidz Juz 30", group: "Desa Kebon Jeruk", age: "Cabe Rawit", status: "Terverifikasi" },
-    { id: "P002", name: "Aisyah Humaira", category: "Mewarnai & Kaligrafi", group: "Desa Sukamaju", age: "Cabe Rawit", status: "Terverifikasi" },
-    { id: "P003", name: "Rizky Ramadhan", category: "Adzan & Iqamah", group: "Desa Mekar Sari", age: "Pra-Remaja", status: "Pending" },
-  ];
+  // Calculations
+  const eventHealth = calculateEventHealth(tasks, risks, divisions);
+  const actionItems = generateActionItems(tasks, risks, divisions);
+
+  // Handlers for Event
+  const handleSaveEvent = (updated: FestivalEvent) => {
+    setCurrentEvent(updated);
+    setEvents(prev => prev.map(e => e.id === updated.id ? updated : e));
+  };
+
+  const handleCreateEvent = (newEvent: FestivalEvent) => {
+    setEvents(prev => [newEvent, ...prev]);
+    setCurrentEvent(newEvent);
+  };
+
+  // Handlers for Divisions
+  const handleAddDivision = (div: Division) => setDivisions(prev => [...prev, div]);
+  const handleUpdateDivision = (div: Division) => setDivisions(prev => prev.map(d => d.id === div.id ? div : d));
+  const handleDeleteDivision = (id: string) => setDivisions(prev => prev.filter(d => d.id !== id));
+
+  // Handlers for Committee
+  const handleAddMember = (m: CommitteeMember) => setCommittee(prev => [...prev, m]);
+  const handleUpdateMember = (m: CommitteeMember) => setCommittee(prev => prev.map(c => c.id === m.id ? m : c));
+  const handleDeleteMember = (id: string) => setCommittee(prev => prev.filter(c => c.id !== id));
+
+  // Handlers for Tasks
+  const handleAddTask = (t: Task) => setTasks(prev => [t, ...prev]);
+  const handleUpdateTask = (t: Task) => setTasks(prev => prev.map(tk => tk.id === t.id ? t : tk));
+  const handleDeleteTask = (id: string) => setTasks(prev => prev.filter(tk => tk.id !== id));
+
+  // Handlers for Risks
+  const handleAddRisk = (r: Risk) => setRisks(prev => [r, ...prev]);
+  const handleUpdateRisk = (r: Risk) => setRisks(prev => prev.map(rk => rk.id === r.id ? r : rk));
+  const handleDeleteRisk = (id: string) => setRisks(prev => prev.filter(rk => rk.id !== id));
+
+  // Navigation handler from Action Needed Panel
+  const handleNavigateTab = (tab: string, targetId?: string) => {
+    setActiveTab(tab as any);
+  };
 
   return (
-    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col">
-      {/* Top Bar */}
-      <header className="bg-slate-900 border-b border-slate-800 px-6 py-4 flex items-center justify-between">
-        <div className="flex items-center gap-3">
-          <Link href="/" className="flex items-center gap-2">
-            <div className="bg-emerald-500 p-2 rounded-xl text-slate-950">
-              <Trophy className="w-5 h-5 stroke-[2.5]" />
-            </div>
-            <span className="font-bold text-lg text-white">FestivalGenerus SaaS</span>
-          </Link>
-        </div>
+    <div className="min-h-screen bg-slate-950 text-slate-100 flex flex-col font-sans selection:bg-emerald-500 selection:text-slate-950">
+      {/* Header & Global Navigation */}
+      <HeaderNav
+        currentEvent={currentEvent}
+        events={events}
+        onSelectEvent={setCurrentEvent}
+        activeTab={activeTab}
+        setActiveTab={setActiveTab}
+        userRole="Ketua Panitia SaaS"
+        userName="H. Zaki"
+      />
 
-        <div className="flex items-center gap-4">
-          <div className="text-right hidden sm:block">
-            <div className="text-sm font-semibold text-slate-200">Panitia Festival</div>
-            <div className="text-xs text-emerald-400">Role: Panitia Event / Admin</div>
-          </div>
-          <Link
-            href="/login"
-            className="p-2 bg-slate-800 hover:bg-slate-700 rounded-lg text-slate-300 transition-colors"
-            title="Keluar"
-          >
-            <LogOut className="w-4 h-4" />
-          </Link>
-        </div>
-      </header>
+      {/* Main Container */}
+      <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
+        {/* Event Context Header */}
+        <EventContextBar event={currentEvent} />
 
-      {/* Main Content Area */}
-      <div className="flex-1 max-w-7xl w-full mx-auto p-6 grid grid-cols-1 md:grid-cols-4 gap-6">
-        {/* Sidebar Nav */}
-        <aside className="space-y-2">
-          <button
-            onClick={() => setActiveTab("events")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${
-              activeTab === "events"
-                ? "bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20 font-bold"
-                : "bg-slate-900 border border-slate-800 text-slate-300 hover:border-slate-700"
-            }`}
-          >
-            <Calendar className="w-4 h-4" /> Manajemen Event
-          </button>
+        {/* Tab 1: Command Center Dashboard (Default Control Center) */}
+        {activeTab === "dashboard" && (
+          <div className="space-y-6 animate-fade-in">
+            {/* Event Health & Readiness Banner */}
+            <EventHealthBanner health={eventHealth} />
 
-          <button
-            onClick={() => setActiveTab("participants")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${
-              activeTab === "participants"
-                ? "bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20 font-bold"
-                : "bg-slate-900 border border-slate-800 text-slate-300 hover:border-slate-700"
-            }`}
-          >
-            <Users className="w-4 h-4" /> Data Peserta & Kontingen
-          </button>
+            {/* 5 Core KPIs */}
+            <KpiPanel
+              event={currentEvent}
+              readinessPercentage={eventHealth.readiness_percentage}
+              tasks={tasks}
+            />
 
-          <button
-            onClick={() => setActiveTab("scoring")}
-            className={`w-full flex items-center gap-3 px-4 py-3 rounded-xl font-medium text-sm transition-all ${
-              activeTab === "scoring"
-                ? "bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20 font-bold"
-                : "bg-slate-900 border border-slate-800 text-slate-300 hover:border-slate-700"
-            }`}
-          >
-            <Award className="w-4 h-4" /> Panel Penilaian Juri
-          </button>
+            {/* CEO Action Panel: WHAT NEEDS MY ATTENTION? */}
+            <ActionNeededPanel
+              items={actionItems}
+              onNavigateTab={handleNavigateTab}
+            />
 
-          <div className="pt-6 border-t border-slate-800/80 mt-6">
-            <div className="bg-slate-900/60 border border-slate-800/80 p-4 rounded-xl text-xs space-y-2">
-              <div className="font-semibold text-emerald-400 flex items-center gap-1.5">
-                <Sparkles className="w-3.5 h-3.5" /> Database Connected
-              </div>
-              <p className="text-slate-400">
-                Terhubung dengan Supabase Cloud. Siap untuk sinkronisasi data real-time.
-              </p>
-            </div>
-          </div>
-        </aside>
-
-        {/* Dashboard View */}
-        <main className="md:col-span-3 space-y-6">
-          {/* Top Quick Stats */}
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
-              <div className="text-xs text-slate-400 mb-1">Total Event Active</div>
-              <div className="text-2xl font-extrabold text-white flex items-center justify-between">
-                <span>2 Event</span>
-                <Calendar className="w-6 h-6 text-emerald-400" />
-              </div>
-            </div>
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
-              <div className="text-xs text-slate-400 mb-1">Total Peserta Terdaftar</div>
-              <div className="text-2xl font-extrabold text-white flex items-center justify-between">
-                <span>200 Orang</span>
-                <Users className="w-6 h-6 text-teal-400" />
-              </div>
-            </div>
-            <div className="bg-slate-900 border border-slate-800 p-5 rounded-2xl">
-              <div className="text-xs text-slate-400 mb-1">Status Penilaian</div>
-              <div className="text-2xl font-extrabold text-white flex items-center justify-between">
-                <span>Real-time</span>
-                <Award className="w-6 h-6 text-cyan-400" />
-              </div>
-            </div>
-          </div>
-
-          {/* Dynamic Tab Content */}
-          {activeTab === "events" && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-lg font-bold text-white">Daftar Festival & Event Perlombaan</h2>
-                  <p className="text-xs text-slate-400">Kelola cabang perlombaan dan kategori umur</p>
-                </div>
-                <button className="px-4 py-2 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg text-xs flex items-center gap-2 transition-all">
-                  <Plus className="w-4 h-4" /> Buat Event Baru
-                </button>
-              </div>
-
-              <div className="space-y-4">
-                {events.map((evt) => (
-                  <div key={evt.id} className="bg-slate-950 border border-slate-800 p-4 rounded-xl flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                    <div>
-                      <div className="flex items-center gap-2">
-                        <h3 className="font-bold text-white text-base">{evt.title}</h3>
-                        <span className="px-2.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/10 text-emerald-400 border border-emerald-500/30">
-                          {evt.status}
-                        </span>
-                      </div>
-                      <div className="flex flex-wrap items-center gap-4 text-xs text-slate-400 mt-2">
-                        <span className="flex items-center gap-1"><Clock className="w-3.5 h-3.5" /> {evt.date}</span>
-                        <span>•</span>
-                        <span>{evt.location}</span>
-                        <span>•</span>
-                        <span className="text-emerald-400 font-medium">{evt.participants} Peserta</span>
-                      </div>
-                    </div>
-                    <div className="flex items-center gap-2 w-full sm:w-auto">
-                      <button className="px-3 py-1.5 bg-slate-800 hover:bg-slate-700 text-xs font-semibold text-slate-200 rounded-lg">
-                        Detail & Kategori
-                      </button>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          )}
-
-          {activeTab === "participants" && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6">
-              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
-                <div>
-                  <h2 className="text-lg font-bold text-white">Data Registrasi Peserta</h2>
-                  <p className="text-xs text-slate-400">Verifikasi status pendaftaran per utusan desa/kelompok</p>
-                </div>
-                <div className="relative w-full sm:w-64">
-                  <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-slate-500" />
-                  <input
-                    type="text"
-                    placeholder="Cari peserta/desa..."
-                    className="w-full bg-slate-950 border border-slate-800 rounded-lg pl-9 pr-3 py-1.5 text-xs text-slate-100 focus:outline-none focus:border-emerald-500"
-                  />
-                </div>
-              </div>
-
-              <div className="overflow-x-auto">
-                <table className="w-full text-left text-xs text-slate-300">
-                  <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
-                    <tr>
-                      <th className="py-3 px-4">ID / Nama</th>
-                      <th className="py-3 px-4">Kategori Lomba</th>
-                      <th className="py-3 px-4">Utusan / Kelompok</th>
-                      <th className="py-3 px-4">Tingkat</th>
-                      <th className="py-3 px-4">Status</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-slate-800">
-                    {participants.map((p) => (
-                      <tr key={p.id} className="hover:bg-slate-950/50">
-                        <td className="py-3 px-4 font-semibold text-white">
-                          <div>{p.name}</div>
-                          <div className="text-[10px] text-slate-500">{p.id}</div>
-                        </td>
-                        <td className="py-3 px-4">{p.category}</td>
-                        <td className="py-3 px-4">{p.group}</td>
-                        <td className="py-3 px-4">{p.age}</td>
-                        <td className="py-3 px-4">
-                          <span className={`px-2 py-0.5 rounded-md text-[10px] font-bold ${
-                            p.status === "Terverifikasi"
-                              ? "bg-emerald-500/10 text-emerald-400 border border-emerald-500/30"
-                              : "bg-amber-500/10 text-amber-400 border border-amber-500/30"
-                          }`}>
-                            {p.status}
-                          </span>
-                        </td>
-                      </tr>
-                    ))}
-                  </tbody>
-                </table>
-              </div>
-            </div>
-          )}
-
-          {activeTab === "scoring" && (
-            <div className="bg-slate-900 border border-slate-800 rounded-2xl p-6 space-y-6">
-              <div>
-                <h2 className="text-lg font-bold text-white">Panel Penilaian Dewan Juri</h2>
-                <p className="text-xs text-slate-400">Input skor penilaian live untuk peserta tampil</p>
-              </div>
-
-              <div className="bg-slate-950 border border-slate-800 p-6 rounded-xl space-y-6">
-                <div className="flex flex-col sm:flex-row justify-between sm:items-center pb-4 border-b border-slate-800 gap-2">
-                  <div>
-                    <span className="text-xs text-emerald-400 font-semibold uppercase tracking-wider">Sedang Tampil</span>
-                    <h3 className="text-xl font-bold text-white">Muhammad Faiz (P001)</h3>
-                    <p className="text-xs text-slate-400">Cabang: Tahfidz Juz 30 • Utusan: Desa Kebon Jeruk</p>
-                  </div>
-                  <span className="px-3 py-1 bg-emerald-500/20 text-emerald-300 text-xs font-bold rounded-lg self-start sm:self-auto">
-                    Juri: Tahfidz Al-Qur'an
-                  </span>
-                </div>
-
-                <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Tajwid & Makhorijul Huruf (Max 40)</label>
-                    <input type="number" max={40} defaultValue={38} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-bold text-emerald-400" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Fashohah & Kelancaran (Max 30)</label>
-                    <input type="number" max={30} defaultValue={29} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-bold text-emerald-400" />
-                  </div>
-                  <div>
-                    <label className="block text-xs font-semibold text-slate-300 mb-1">Adab & Lagu (Max 30)</label>
-                    <input type="number" max={30} defaultValue={27} className="w-full bg-slate-900 border border-slate-700 rounded-lg p-2.5 text-sm font-bold text-emerald-400" />
-                  </div>
-                </div>
-
-                <div className="flex justify-end pt-2">
-                  <button className="px-6 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg text-sm flex items-center gap-2 shadow-md shadow-emerald-500/20">
-                    <CheckCircle className="w-4 h-4" /> Simpan Nilai Peserta
+            {/* Overview Grids: Divisions & Urgent Tasks */}
+            <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+              {/* Division Overview Card */}
+              <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-white text-base flex items-center gap-2">
+                    <Building className="w-5 h-5 text-teal-400" /> Status Divisi Panitia
+                  </h3>
+                  <button
+                    onClick={() => setActiveTab("divisions")}
+                    className="text-xs text-emerald-400 hover:underline font-semibold"
+                  >
+                    Kelola Divisi &rarr;
                   </button>
                 </div>
+
+                <div className="space-y-3">
+                  {divisions.slice(0, 4).map((d) => {
+                    const total = d.total_tasks || 0;
+                    const completed = d.completed_tasks || 0;
+                    const pct = total ? Math.round((completed / total) * 100) : 0;
+
+                    return (
+                      <div key={d.id} className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 space-y-2">
+                        <div className="flex items-center justify-between text-xs">
+                          <span className="font-bold text-white">Divisi {d.name}</span>
+                          <span className="font-mono text-slate-400">{completed}/{total} ({pct}%)</span>
+                        </div>
+                        <div className="w-full bg-slate-900 h-1.5 rounded-full overflow-hidden">
+                          <div
+                            className={`h-full ${pct >= 80 ? "bg-emerald-400" : pct >= 50 ? "bg-teal-400" : "bg-amber-400"}`}
+                            style={{ width: `${pct}%` }}
+                          />
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              {/* Tasks Engine Quick Card */}
+              <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
+                <div className="flex items-center justify-between">
+                  <h3 className="font-bold text-white text-base flex items-center gap-2">
+                    <CheckSquare className="w-5 h-5 text-emerald-400" /> Task Critical & Overdue
+                  </h3>
+                  <button
+                    onClick={() => setActiveTab("tasks")}
+                    className="text-xs text-emerald-400 hover:underline font-semibold"
+                  >
+                    Buka Task Engine &rarr;
+                  </button>
+                </div>
+
+                <div className="space-y-3">
+                  {tasks
+                    .filter(t => t.priority === "CRITICAL" || t.is_overdue || t.status === "BLOCKED")
+                    .slice(0, 3)
+                    .map((t) => (
+                      <div key={t.id} className="bg-slate-950 p-3.5 rounded-xl border border-slate-800 flex items-center justify-between gap-3 text-xs">
+                        <div>
+                          <div className="font-bold text-white flex items-center gap-2">
+                            <span>{t.title}</span>
+                            <span className="px-2 py-0.5 rounded text-[9px] font-black bg-rose-500 text-slate-950">
+                              {t.priority}
+                            </span>
+                          </div>
+                          <div className="text-[11px] text-slate-400 mt-0.5">PIC: {t.pic_name} • Divisi {t.division_name}</div>
+                        </div>
+                        <span className="px-2.5 py-1 rounded bg-slate-900 border border-slate-800 font-mono text-[10px] text-amber-400 font-bold shrink-0">
+                          {t.status}
+                        </span>
+                      </div>
+                    ))}
+                </div>
               </div>
             </div>
-          )}
-        </main>
-      </div>
+          </div>
+        )}
+
+        {/* Tab 2: Events Configuration */}
+        {activeTab === "events" && (
+          <EventManagementTab
+            currentEvent={currentEvent}
+            events={events}
+            onSaveEvent={handleSaveEvent}
+            onCreateEvent={handleCreateEvent}
+          />
+        )}
+
+        {/* Tab 3: Divisions */}
+        {activeTab === "divisions" && (
+          <DivisionsTab
+            divisions={divisions}
+            onAddDivision={handleAddDivision}
+            onUpdateDivision={handleUpdateDivision}
+            onDeleteDivision={handleDeleteDivision}
+          />
+        )}
+
+        {/* Tab 4: Committee */}
+        {activeTab === "committee" && (
+          <CommitteeTab
+            committee={committee}
+            divisions={divisions}
+            onAddMember={handleAddMember}
+            onUpdateMember={handleUpdateMember}
+            onDeleteMember={handleDeleteMember}
+          />
+        )}
+
+        {/* Tab 5: Tasks Engine */}
+        {activeTab === "tasks" && (
+          <TasksTab
+            tasks={tasks}
+            divisions={divisions}
+            committee={committee}
+            onAddTask={handleAddTask}
+            onUpdateTask={handleUpdateTask}
+            onDeleteTask={handleDeleteTask}
+          />
+        )}
+
+        {/* Tab 6: Risk Matrix */}
+        {activeTab === "risks" && (
+          <RisksTab
+            risks={risks}
+            committee={committee}
+            onAddRisk={handleAddRisk}
+            onUpdateRisk={handleUpdateRisk}
+            onDeleteRisk={handleDeleteRisk}
+          />
+        )}
+
+        {/* Tab 7: Audit Logs */}
+        {activeTab === "audit" && <AuditLogTab />}
+      </main>
     </div>
   );
 }
