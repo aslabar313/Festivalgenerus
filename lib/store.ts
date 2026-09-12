@@ -20,7 +20,8 @@ import {
   NotificationItem,
   AuditTrailItem,
   ActionNeededItem, 
-  EventHealthDetails 
+  EventHealthDetails,
+  MusyawarohItem 
 } from "./types";
 
 export const DEFAULT_EVENT: FestivalEvent = {
@@ -48,12 +49,56 @@ export const INITIAL_DIVISIONS: Division[] = [
 ];
 
 export const INITIAL_COMMITTEE: CommitteeMember[] = [
-  { id: "com-1", event_id: "evt-fg2026", name: "H. Muhammad Zaki", email: "zaki@generus.id", phone: "081234567890", role: "ketua", status: "ACTIVE", active_tasks_count: 3 },
-  { id: "com-2", event_id: "evt-fg2026", name: "Rahmat Hidayat", email: "rahmat@generus.id", phone: "081298765432", role: "sekretaris", status: "ACTIVE", active_tasks_count: 5 },
-  { id: "com-3", event_id: "evt-fg2026", name: "Anisa Fitri", email: "anisa@generus.id", phone: "081311223344", role: "bendahara", status: "ACTIVE", active_tasks_count: 2 },
-  { id: "com-4", event_id: "evt-fg2026", name: "Ustadz H. Ahmad", email: "ahmad@generus.id", phone: "081455667788", role: "koordinator", division_id: "div-1", division_name: "Acara", status: "ACTIVE", active_tasks_count: 4 },
-  { id: "com-5", event_id: "evt-fg2026", name: "Budi Santoso", email: "budi@generus.id", phone: "081599887766", role: "koordinator", division_id: "div-4", division_name: "Logistik", status: "ACTIVE", active_tasks_count: 6 },
-  { id: "com-6", event_id: "evt-fg2026", name: "Siti Rahma", email: "siti@generus.id", phone: "081622334455", role: "koordinator", division_id: "div-2", division_name: "Registrasi", status: "ACTIVE", active_tasks_count: 3 },
+  { id: "com-1", event_id: "evt-fg2026", name: "H. Muhammad Zaki", email: "zaki@generus.id", phone: "081234567890", role: "ketua", position_title: "Ketua Panitia Utama", tupoksi: "Memimpin seluruh koordinasi event, mengambil keputusan strategis, & bertanggung jawab penuh atas kelancaran acara.", status: "ACTIVE", active_tasks_count: 3 },
+  { id: "com-2", event_id: "evt-fg2026", name: "Rahmat Hidayat", email: "rahmat@generus.id", phone: "081298765432", role: "sekretaris", position_title: "Sekretaris Utama", tupoksi: "Pengelolaan notulensi musyawaroh, administrasi perizinan, persuratan, & inventarisasi berkas dokumen event.", status: "ACTIVE", active_tasks_count: 5 },
+  { id: "com-3", event_id: "evt-fg2026", name: "Anisa Fitri", email: "anisa@generus.id", phone: "081311223344", role: "bendahara", position_title: "Bendahara Utama", tupoksi: "Pencatatan kas masuk/keluar, verifikasi anggaran operasional divisi, & penyusunan LPJ Keuangan.", status: "ACTIVE", active_tasks_count: 2 },
+  { id: "com-4", event_id: "evt-fg2026", name: "Ustadz H. Ahmad", email: "ahmad@generus.id", phone: "081455667788", role: "koordinator", position_title: "Koordinator Divisi Acara", division_id: "div-1", division_name: "Acara", tupoksi: "Perencanaan rundown acara, pembekalan & koordinasi dewan juri, tata tertib juknis, serta kelancaran panggung perlombaan.", status: "ACTIVE", active_tasks_count: 4 },
+  { id: "com-5", event_id: "evt-fg2026", name: "Budi Santoso", email: "budi@generus.id", phone: "081599887766", role: "koordinator", position_title: "Koordinator Divisi Logistik", division_id: "div-4", division_name: "Logistik", tupoksi: "Penyediaan venue, genset & sound system, perlengkapan panggung, tata ruang aula, & inventarisasi barang.", status: "ACTIVE", active_tasks_count: 6 },
+  { id: "com-6", event_id: "evt-fg2026", name: "Siti Rahma", email: "siti@generus.id", phone: "081622334455", role: "koordinator", position_title: "Koordinator Divisi Registrasi", division_id: "div-2", division_name: "Registrasi", tupoksi: "Pengelolaan portal pendaftaran online utusan desa, verifikasi identitas peserta, loket check-in Hari-H, & pembagian ID Card.", status: "ACTIVE", active_tasks_count: 3 },
+];
+
+export const INITIAL_MUSYAWAROH: MusyawarohItem[] = [
+  {
+    id: "musy-1",
+    event_id: "evt-fg2026",
+    title: "Musyawaroh Pleno H-14 Prep Festival Generus 2026",
+    meeting_date: "2026-09-10T19:30:00.000Z",
+    location: "Ruang Rapat Utama Gedung PPG Magetan Timur",
+    leader_name: "Super Admin PPG / Ketua Panitia",
+    notulis_name: "Sekretaris Utama",
+    attendees_count: 18,
+    attendees_list: "Superadmin, Wakil Ketua, Sekretaris, Bendahara, Koordinator Acara, Logistik, Registrasi, Humas, Konsumsi",
+    agenda: "Evaluasi Kesiapan Tempat, Pembekalan Juri Tahfidz, & Alokasi Anggaran Genset Cadangan",
+    results_summary: "Disepakati penambahan genset cadangan 10KVA untuk antisipasi beban puncak. Juknis lomba disahkan dan perizinan Polsek difinalkan.",
+    decisions: [
+      "Menginstruksikan Divisi Logistik menyewa genset 10KVA dengan Automatic Transfer Switch.",
+      "Sekretariat wajib menyelesaikan surat perizinan ke Polsek setempat maksimal H-7.",
+      "Divisi Acara mengonfirmasi kehadiran 9 Dewan Juri Daerah."
+    ],
+    assigned_tasks_count: 3,
+    created_by: "Sekretaris Utama",
+    created_at: "2026-09-10T21:00:00.000Z",
+  },
+  {
+    id: "musy-2",
+    event_id: "evt-fg2026",
+    title: "Musyawaroh Terbatas Pimpinan (Penetapan SOP Keuangan & Rundown)",
+    meeting_date: "2026-09-05T20:00:00.000Z",
+    location: "Masjid Agung PPG Area Rapat",
+    leader_name: "Wakil Ketua Panitia",
+    notulis_name: "Sekretaris Utama",
+    attendees_count: 5,
+    attendees_list: "Superadmin, Wakil Ketua, Sekretaris, Bendahara",
+    agenda: "Penetapan plafon konsumsi panitia & approval DP sewa gedung",
+    results_summary: "DP Sewa Gedung disetujui sebesar Rp 12.000.000. Sistem pelaporan transaksi kas wajib melampirkan kwitansi digital.",
+    decisions: [
+      "Bendahara diberikan wewenang approval transaksi operasional di bawah Rp 5.000.000.",
+      "Notulensi musyawaroh dikirimkan ke grup koordinasi tiap pekan."
+    ],
+    assigned_tasks_count: 2,
+    created_by: "Wakil Ketua Panitia",
+    created_at: "2026-09-05T21:30:00.000Z",
+  }
 ];
 
 export const INITIAL_TASKS: Task[] = [

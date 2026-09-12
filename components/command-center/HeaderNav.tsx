@@ -23,7 +23,8 @@ import {
   Flame,
   Package,
   DollarSign,
-  FileSpreadsheet
+  FileSpreadsheet,
+  MessageSquare
 } from "lucide-react";
 import { FestivalEvent } from "@/lib/types";
 
@@ -56,6 +57,8 @@ export function HeaderNav({
   const navItems = [
     { id: "dashboard", label: "Command Center", icon: LayoutDashboard },
     { id: "live_event", label: "LIVE EVENT (H)", icon: Flame, highlight: true },
+    { id: "musyawaroh", label: "Musyawaroh / Notulensi", icon: MessageSquare },
+    { id: "committee", label: "Kepanitiaan & Tupoksi", icon: Users },
     { id: "incidents", label: "Incidents", icon: AlertTriangle },
     { id: "judge_panel", label: "Panel Juri Live", icon: Star },
     { id: "scoring_results", label: "Hasil & Juara", icon: Trophy },

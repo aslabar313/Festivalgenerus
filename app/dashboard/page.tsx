@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   DEFAULT_EVENT, 
   INITIAL_DIVISIONS, 
@@ -21,6 +21,7 @@ import {
   INITIAL_DOCUMENTS,
   INITIAL_NOTIFICATIONS,
   INITIAL_AUDIT_TRAIL,
+  INITIAL_MUSYAWAROH,
   calculateEventHealth, 
   generateActionItems,
   detectScheduleConflicts 
@@ -46,7 +47,8 @@ import {
   NotificationItem,
   AuditTrailItem,
   ParticipantLifecycleStatus,
-  RegistrationStatus
+  RegistrationStatus,
+  MusyawarohItem
 } from "@/lib/types";
 import { HeaderNav } from "@/components/command-center/HeaderNav";
 import { EventContextBar } from "@/components/command-center/EventContextBar";
@@ -72,6 +74,7 @@ import { LogisticsTab } from "@/components/command-center/LogisticsTab";
 import { FinanceTab } from "@/components/command-center/FinanceTab";
 import { DocumentsTab } from "@/components/command-center/DocumentsTab";
 import { ReportsTab } from "@/components/command-center/ReportsTab";
+import { MusyawarohTab } from "@/components/command-center/MusyawarohTab";
 import { Star, Trophy, Calendar, ShieldAlert, DollarSign, Package, AlertTriangle, Flame } from "lucide-react";
 
 export default function CommandCenterDashboard() {
@@ -98,10 +101,32 @@ export default function CommandCenterDashboard() {
   const [documents, setDocuments] = useState<DocumentItem[]>(INITIAL_DOCUMENTS);
   const [notifications, setNotifications] = useState<NotificationItem[]>(INITIAL_NOTIFICATIONS);
   const [auditItems, setAuditItems] = useState<AuditTrailItem[]>(INITIAL_AUDIT_TRAIL);
+  const [musyawarohList, setMusyawarohList] = useState<MusyawarohItem[]>(INITIAL_MUSYAWAROH);
 
   const [activeTab, setActiveTab] = useState<
-    "dashboard" | "live_event" | "incidents" | "judge_panel" | "scoring_results" | "schedules" | "events" | "competitions" | "participants" | "my_portal" | "divisions" | "committee" | "tasks" | "risks" | "logistics" | "finance" | "documents" | "reports" | "notifications" | "audit"
+    "dashboard" | "live_event" | "musyawaroh" | "incidents" | "judge_panel" | "scoring_results" | "schedules" | "events" | "competitions" | "participants" | "my_portal" | "divisions" | "committee" | "tasks" | "risks" | "logistics" | "finance" | "documents" | "reports" | "notifications" | "audit"
   >("dashboard");
+
+  const [currentUser, setCurrentUser] = useState<{ full_name: string; role: string }>({
+    full_name: "Super Admin PPG",
+    role: "Superadmin (PPG Magetan Timur)",
+  });
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      try {
+        const stored = localStorage.getItem("fg_user");
+        if (stored) {
+          const parsed = JSON.parse(stored);
+          if (parsed.full_name && parsed.role) {
+            setCurrentUser({ full_name: parsed.full_name, role: parsed.role });
+          }
+        }
+      } catch (e) {
+        console.error("Failed to parse fg_user from localStorage", e);
+      }
+    }
+  }, []);
 
   // Calculations
   const eventHealth = calculateEventHealth(tasks, risks, divisions);
@@ -244,6 +269,16 @@ export default function CommandCenterDashboard() {
     addAuditLog("Panitia Sekretariat", "UPLOAD_DOCUMENT", doc.name, `Unggah dokumen arsip ${doc.category}`);
   };
 
+  const handleAddMusyawaroh = (item: MusyawarohItem) => {
+    setMusyawarohList(prev => [item, ...prev]);
+    addAuditLog(item.leader_name, "CREATED_MUSYAWAROH", item.title, `Pencatatan notulensi musyawaroh baru`);
+  };
+
+  const handleAddTaskFromMusyawaroh = (task: Task) => {
+    setTasks(prev => [task, ...prev]);
+    addAuditLog(currentUser.full_name, "ASSIGNED_MUSYAWAROH_TASK", task.title, `Penugasan instruksi musyawaroh ke Divisi ${task.division_name}`);
+  };
+
   const addAuditLog = (who: string, did_what: string, on_what: string, details: string) => {
     const newLog: AuditTrailItem = {
       id: `aud-${Date.now()}`,
@@ -268,8 +303,8 @@ export default function CommandCenterDashboard() {
         onSelectEvent={setCurrentEvent}
         activeTab={activeTab}
         setActiveTab={setActiveTab}
-        userRole="Ketua & System Command OS"
-        userName="H. Zaki"
+        userRole={currentUser.role}
+        userName={currentUser.full_name}
         unreadCount={unreadNotifCount}
         conflictCount={conflicts.length}
       />
@@ -343,6 +378,19 @@ export default function CommandCenterDashboard() {
               </div>
             </div>
           </div>
+        )}
+
+        {/* Tab Musyawaroh */}
+        {activeTab === "musyawaroh" && (
+          <MusyawarohTab
+            musyawarohList={musyawarohList}
+            divisions={divisions}
+            committee={committee}
+            currentUserUsername={currentUser.full_name}
+            currentUserRole={currentUser.role}
+            onAddMusyawaroh={handleAddMusyawaroh}
+            onAddTaskFromMusyawaroh={handleAddTaskFromMusyawaroh}
+          />
         )}
 
         {/* Tab 2: Live Event (Hari-H) */}

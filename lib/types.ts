@@ -58,6 +58,8 @@ export interface CommitteeMember {
   email: string;
   phone?: string;
   role: CommitteeRole;
+  position_title?: string;
+  tupoksi?: string;
   division_id?: string;
   division_name?: string;
   status: 'ACTIVE' | 'INACTIVE';
@@ -319,4 +321,22 @@ export interface EventHealthDetails {
   status: EventHealthStatus;
   readiness_percentage: number;
   reasons: ReadinessFactor[];
+}
+
+export interface MusyawarohItem {
+  id: string;
+  event_id: string;
+  title: string;
+  meeting_date: string;
+  location: string;
+  leader_name: string;
+  notulis_name: string;
+  attendees_count: number;
+  attendees_list?: string;
+  agenda: string;
+  results_summary: string;
+  decisions: string[];
+  assigned_tasks_count?: number;
+  created_by?: string;
+  created_at: string;
 }
