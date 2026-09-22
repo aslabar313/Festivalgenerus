@@ -129,7 +129,7 @@ export default function CommandCenterDashboard() {
   }, []);
 
   // Calculations
-  const eventHealth = calculateEventHealth(tasks, risks, divisions);
+  const eventHealth = calculateEventHealth(tasks, risks, divisions, participants, competitionJudges, venues, inventory);
   const actionItems = generateActionItems(tasks, risks, divisions);
   const conflicts = detectScheduleConflicts(schedules, competitionJudges, registrations);
   const unreadNotifCount = notifications.filter(n => !n.is_read).length;

@@ -10,20 +10,24 @@ interface ParticipantDashboardTabProps {
 }
 
 export function ParticipantDashboardTab({
-  currentParticipant = {
-    id: "part-101",
-    name: "Muhammad Faiz",
-    participant_type: "INDIVIDUAL",
-    category: "Cabe Rawit",
-    school: "TPQ Al-Fattah",
-    group_name: "Desa Kebon Jeruk",
-    phone: "081234111222",
-    email: "faiz@gmail.com",
-    status: "APPROVED",
-  },
+  currentParticipant,
   registrations,
   competitions,
 }: ParticipantDashboardTabProps) {
+  if (!currentParticipant) {
+    return (
+      <div className="bg-slate-900 border border-slate-800 p-8 rounded-2xl text-center space-y-3">
+        <div className="w-12 h-12 rounded-full bg-slate-800 text-slate-400 flex items-center justify-center mx-auto">
+          <User className="w-6 h-6" />
+        </div>
+        <h3 className="text-lg font-bold text-white">Belum Ada Data Peserta Terpilih</h3>
+        <p className="text-xs text-slate-400 max-w-sm mx-auto">
+          Silakan daftarkan atau pilih peserta terlebih dahulu pada menu Pendaftaran Peserta.
+        </p>
+      </div>
+    );
+  }
+
   const myRegistrations = registrations.filter(r => r.participant_id === currentParticipant.id);
 
   return (
