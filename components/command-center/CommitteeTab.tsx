@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CommitteeMember, CommitteeRole, Division } from "@/lib/types";
-import { Users, Plus, ShieldCheck, Phone, Building, CheckSquare, Edit, Trash2, BookOpen, Layers, LayoutGrid, List } from "lucide-react";
+import { Users, Plus, ShieldCheck, Phone, Building, CheckSquare, Square, Edit, Trash2, BookOpen, Layers, LayoutGrid, List, Sparkles } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 
 interface CommitteeTabProps {
@@ -28,44 +28,54 @@ export const DAPUKAN_OPTIONS = [
 
 export const TUPOKSI_MAP: Record<string, string[]> = {
   "wakil ketua": [
-    "Mendampingi Ketua Utama, memimpin jalannya koordinasi antar divisi, dan mengambil keputusan operasional saat Ketua berhalangan.",
-    "Memantau pelaksanaan kegiatan seluruh divisi panitia dan memastikan kesiapan Hari-H."
+    "Mendampingi Ketua Utama & memimpin koordinasi operasional seluruh divisi panitia.",
+    "Memantau kesiapan tempat, kelancaran acara Hari-H, & mengambil keputusan saat Ketua berhalangan.",
+    "Melakukan evaluasi progres harian tugas divisi panitia."
   ],
   "pengawas": [
-    "Mengawasi pelaksanaan kegiatan agar sesuai juknis, tata tertib, dan mengontrol ketertiban serta kelancaran acara.",
-    "Melakukan audit kesiapan venue, keabsahan berkas lomba, dan kepatuhan prosedur event."
+    "Mengawasi pelaksanaan kegiatan agar sesuai juknis, tata tertib, & prosedur organisasi.",
+    "Melakukan audit kesiapan venue, keabsahan berkas lomba, & kepatuhan aturan event.",
+    "Memastikan keamanan, kenyamanan, & ketertiban seluruh jalannya festival."
   ],
   "sekretaris": [
-    "Mengelola administrasi perizinan, persuratan resmi, notulensi musyawaroh pimpinan, dan registrasi dokumen.",
-    "Menyusun sertifikat kejuaraan, prasasti event, dan mengarsipkan dokumen resmi kegiatan."
+    "Mengelola administrasi perizinan kepolisian, dinas, persuratan resmi, & notulensi musyawaroh.",
+    "Menyusun sertifikat kejuaraan, prasasti event, & pengarsipan dokumen resmi.",
+    "Mengatur jadwal registrasi & presensi kehadiran kepanitiaan."
   ],
   "bendahara": [
-    "Pencatatan kas masuk & keluar, verifikasi nota pengeluaran operasional divisi, dan pembuatan LPJ Keuangan.",
-    "Pengelolaan dana tak terduga, alokasi anggaran konsumsi & hadiah, serta pencatatan donasi."
+    "Pencatatan kas masuk & keluar, verifikasi nota operasional divisi, & penyusunan LPJ Keuangan.",
+    "Pengelolaan dana tak terduga, alokasi anggaran konsumsi, logistik & piala kejuaraan.",
+    "Memeriksa & menyetujui pengajuan pencairan dana divisi panitia."
   ],
   "Konsumsi": [
-    "Penyediaan dan penataan konsumsi untuk Panitia, Dewan Juri, Tamu Undangan, dan Peserta.",
-    "Mengatur jadwal pembagian konsumsi tepat waktu dan menjaga kebersihan area konsumsi."
+    "Penyediaan & penataan konsumsi untuk Panitia, Dewan Juri, Tamu Undangan, & Peserta.",
+    "Mengatur jadwal pembagian konsumsi tepat waktu & kerapian area konsumsi.",
+    "Memastikan ketersediaan air minum & makanan ringan di tiap venue lomba."
   ],
   "Sarana Prasarana": [
-    "Penataan tempat panggung, penyediaan sound system, genset cadangan 10KVA, kursi, dan tenda venue.",
-    "Inventarisasi alat perlengkapan event, pengecekan instalasi kelistrikan, serta kelengkapan fisik panggung."
+    "Penataan tempat panggung, sound system, genset cadangan 10KVA, kursi, & tenda venue.",
+    "Inventarisasi alat perlengkapan event, kelistrikan, & kelengkapan fisik panggung.",
+    "Menjaga kebersihan venue & penataan sekat ruangan panggung perlombaan."
   ],
   "Pembuat Soal & Koor Juri": [
-    "Penyusunan naskah soal perlombaan, pembekalan dewan juri, penentuan kriteria penilaian, dan pengawalan penilaian live score.",
-    "Verifikasi kesiapan lembar penilaian juri, perekapan nilai akhir, dan penyerahan daftar juara ke panitia."
+    "Penyusunan naskah soal perlombaan, pembekalan dewan juri, & kriteria penilaian.",
+    "Verifikasi kesiapan lembar penilaian juri, pengawalan live score, & pengumuman hasil.",
+    "Merekap skor nilai akhir & menyerahkan daftar pemenang ke pimpinan."
   ],
   "Hadiah & Piala": [
-    "Pengadaan tropi piala kejuaraan, piagam penghargaan, penyiapan hadiah pemenang, dan pendampingan prosesi penganugerahan di panggung.",
-    "Pengecekan fisik trophy, pembungkusan hadiah, dan koordinasi urutan pemanggilan juara saat penutupan."
+    "Pengadaan tropi piala kejuaraan, piagam penghargaan, & hadiah pemenang.",
+    "Pengecekan fisik piala, pembungkusan hadiah, & koordinasi penganugerahan panggung.",
+    "Mendampingi prosesi penyerahan tropi juara saat penutupan acara."
   ],
   "Dokumentasi": [
-    "Pengambilan foto/video kegiatan, pengelolaan live streaming panggung, dan pembuatan video dokumentasi event.",
-    "Pengumpulan aset visual untuk laporan kegiatan dan pengarsipan materi liputan event."
+    "Pengambilan foto/video kegiatan, pengelolaan live streaming panggung, & video teaser event.",
+    "Pengumpulan aset visual untuk laporan kegiatan & liputan publikasi resmi.",
+    "Membuat dokumentasi prasasti foto seluruh rangkaian acara."
   ],
   "Pembantu Umum": [
-    "Membantu mobilisasi umum lapangan, membantu kebersihan tempat, dan membantu tugas mendesak seluruh divisi.",
-    "Penanganan bantuan logistik cepat, kesiapan perlengkapan darurat, dan koordinasi umum di lokasi."
+    "Membantu mobilisasi umum lapangan, membantu kebersihan tempat, & tugas mendesak divisi.",
+    "Penanganan bantuan logistik cepat, peralatan darurat, & bantuan umum lokasi.",
+    "Membantu penataan ruangan & penerimaan tamu di lokasi event."
   ]
 };
 
@@ -84,17 +94,33 @@ export function CommitteeTab({
   const [name, setName] = useState("");
   const [phone, setPhone] = useState("");
   const [dapukan, setDapukan] = useState(DAPUKAN_OPTIONS[0]);
-  const [tupoksi, setTupoksi] = useState(TUPOKSI_MAP[DAPUKAN_OPTIONS[0]][0]);
+  const [selectedTupoksiList, setSelectedTupoksiList] = useState<string[]>([]);
+  const [customTupoksiInput, setCustomTupoksiInput] = useState("");
+  const [customTupoksiItems, setCustomTupoksiItems] = useState<string[]>([]);
   const [divisionId, setDivisionId] = useState("");
 
   const handleDapukanChange = (newDapukan: string) => {
     setDapukan(newDapukan);
-    const availableTupoksi = TUPOKSI_MAP[newDapukan] || [];
-    if (availableTupoksi.length > 0) {
-      setTupoksi(availableTupoksi[0]);
-    } else {
-      setTupoksi("");
+    const recs = TUPOKSI_MAP[newDapukan] || [];
+    setSelectedTupoksiList(recs);
+    setCustomTupoksiItems([]);
+    setCustomTupoksiInput("");
+  };
+
+  const toggleTupoksiCheck = (item: string) => {
+    setSelectedTupoksiList(prev =>
+      prev.includes(item) ? prev.filter(i => i !== item) : [...prev, item]
+    );
+  };
+
+  const handleAddCustomTupoksi = () => {
+    const trimmed = customTupoksiInput.trim();
+    if (!trimmed) return;
+    if (!customTupoksiItems.includes(trimmed)) {
+      setCustomTupoksiItems(prev => [...prev, trimmed]);
+      setSelectedTupoksiList(prev => [...prev, trimmed]);
     }
+    setCustomTupoksiInput("");
   };
 
   const mapDapukanToRole = (dap: string): CommitteeRole => {
@@ -111,7 +137,10 @@ export function CommitteeTab({
     setName("");
     setPhone("");
     setDapukan(DAPUKAN_OPTIONS[0]);
-    setTupoksi(TUPOKSI_MAP[DAPUKAN_OPTIONS[0]][0]);
+    const recs = TUPOKSI_MAP[DAPUKAN_OPTIONS[0]] || [];
+    setSelectedTupoksiList(recs);
+    setCustomTupoksiItems([]);
+    setCustomTupoksiInput("");
     setDivisionId("");
     setIsModalOpen(true);
   };
@@ -122,7 +151,14 @@ export function CommitteeTab({
     setPhone(m.phone || "");
     const initialDapukan = m.position_title && DAPUKAN_OPTIONS.includes(m.position_title) ? m.position_title : DAPUKAN_OPTIONS[0];
     setDapukan(initialDapukan);
-    setTupoksi(m.tupoksi || (TUPOKSI_MAP[initialDapukan]?.[0] || ""));
+    const recs = TUPOKSI_MAP[initialDapukan] || [];
+    const existingArr = m.tupoksi ? m.tupoksi.split(" • ").map(s => s.trim()).filter(Boolean) : recs;
+    setSelectedTupoksiList(existingArr);
+    
+    const custom = existingArr.filter(item => !recs.includes(item));
+    setCustomTupoksiItems(custom);
+    setCustomTupoksiInput("");
+
     setDivisionId(m.division_id || "");
     setIsModalOpen(true);
   };
@@ -131,6 +167,7 @@ export function CommitteeTab({
     e.preventDefault();
     const selectedDiv = divisions.find(d => d.id === divisionId);
     const calculatedRole = mapDapukanToRole(dapukan);
+    const finalTupoksiString = selectedTupoksiList.join(" • ") || "Membantu koordinasi dan tugas operasional sesuai instruksi pimpinan.";
 
     if (editingMember) {
       onUpdateMember({
@@ -140,7 +177,7 @@ export function CommitteeTab({
         phone,
         role: calculatedRole,
         position_title: dapukan,
-        tupoksi,
+        tupoksi: finalTupoksiString,
         division_id: divisionId,
         division_name: selectedDiv?.name,
       });
@@ -153,7 +190,7 @@ export function CommitteeTab({
         phone,
         role: calculatedRole,
         position_title: dapukan,
-        tupoksi,
+        tupoksi: finalTupoksiString,
         division_id: divisionId,
         division_name: selectedDiv?.name,
         status: "ACTIVE",
@@ -172,7 +209,8 @@ export function CommitteeTab({
     return "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
   };
 
-  const availableTupoksiOptions = TUPOKSI_MAP[dapukan] || [];
+  const recommendations = TUPOKSI_MAP[dapukan] || [];
+  const allDisplayTupoksiOptions = Array.from(new Set([...recommendations, ...customTupoksiItems]));
 
   return (
     <div className="space-y-6">
@@ -183,7 +221,7 @@ export function CommitteeTab({
             <Users className="w-5 h-5 text-emerald-400" /> Fitur Kepanitiaan & Structure Customizer (Dapukan)
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Atur struktur susunan kepanitiaan, nama personel, Dapukan (Jabatan Panitia), serta Tupoksi (Tugas Pokok & Fungsi) yang tersambung secara otomatis.
+            Atur struktur susunan kepanitiaan, Dapukan (Jabatan Panitia), serta Ceklist Rekomendasi Tupoksi & Opsi Tambah Tupoksi Custom.
           </p>
         </div>
 
@@ -246,13 +284,22 @@ export function CommitteeTab({
                 </div>
 
                 {/* Tupoksi Section */}
-                <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-800/80 space-y-1">
+                <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-800/80 space-y-1.5">
                   <div className="text-[10px] font-extrabold uppercase tracking-wider text-slate-400 flex items-center gap-1.5">
-                    <BookOpen className="w-3 h-3 text-amber-400" /> Tupoksi (Tugas Pokok & Fungsi)
+                    <BookOpen className="w-3 h-3 text-amber-400" /> Tupoksi Ceklist Terpilih:
                   </div>
-                  <p className="text-xs text-slate-300 leading-relaxed italic">
-                    "{m.tupoksi || "Memfasilitasi kelancaran koordinasi divisi & bertindak sesuai arahan instruksi musyawaroh pimpinan."}"
-                  </p>
+                  {m.tupoksi ? (
+                    <ul className="space-y-1 text-xs text-slate-300">
+                      {m.tupoksi.split(" • ").map((tItem, idx) => (
+                        <li key={idx} className="flex items-start gap-1.5">
+                          <span className="text-emerald-400 font-bold">•</span>
+                          <span className="leading-snug">{tItem}</span>
+                        </li>
+                      ))}
+                    </ul>
+                  ) : (
+                    <p className="text-xs text-slate-500 italic">Belum diatur</p>
+                  )}
                 </div>
               </div>
 
@@ -369,7 +416,7 @@ export function CommitteeTab({
         onClose={() => setIsModalOpen(false)}
         title={editingMember ? "Edit Panitia & Dapukan" : "Tambah Panitia Baru"}
       >
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form onSubmit={handleSubmit} className="space-y-4 max-h-[75vh] overflow-y-auto pr-1">
           <div>
             <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Nama Lengkap Panitia</label>
             <input
@@ -397,21 +444,73 @@ export function CommitteeTab({
             </select>
           </div>
 
-          <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">
-              Tupoksi (Otomatis Sesuai Dapukan "{dapukan}")
-            </label>
-            <select
-              value={tupoksi}
-              onChange={(e) => setTupoksi(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-emerald-300 focus:outline-none focus:border-emerald-500 leading-relaxed"
-            >
-              {availableTupoksiOptions.map((tup, idx) => (
-                <option key={idx} value={tup}>
-                  Pilihan {idx + 1}: {tup}
-                </option>
-              ))}
-            </select>
+          {/* CEKLIST REKOMENDASI TUPOKSI + CUSTOM INPUT */}
+          <div className="space-y-2 bg-slate-950 p-4 rounded-xl border border-slate-800">
+            <div className="flex items-center justify-between border-b border-slate-800 pb-2">
+              <label className="block text-xs font-bold text-emerald-400 uppercase tracking-wider flex items-center gap-1.5">
+                <Sparkles className="w-4 h-4" /> Ceklist Rekomendasi Tupoksi ({selectedTupoksiList.length} Dipilih)
+              </label>
+              <button
+                type="button"
+                onClick={() => setSelectedTupoksiList(allDisplayTupoksiOptions)}
+                className="text-[11px] text-emerald-400 hover:underline font-semibold"
+              >
+                Pilih Semua
+              </button>
+            </div>
+
+            <div className="space-y-2 pt-1">
+              {allDisplayTupoksiOptions.map((tItem, idx) => {
+                const isChecked = selectedTupoksiList.includes(tItem);
+                return (
+                  <label
+                    key={idx}
+                    onClick={() => toggleTupoksiCheck(tItem)}
+                    className={`flex items-start gap-2.5 p-2.5 rounded-lg border cursor-pointer text-xs transition-colors ${
+                      isChecked
+                        ? "bg-emerald-500/15 border-emerald-500/40 text-emerald-200 font-semibold"
+                        : "bg-slate-900/60 border-slate-800/80 text-slate-400 hover:bg-slate-900"
+                    }`}
+                  >
+                    {isChecked ? (
+                      <CheckSquare className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+                    ) : (
+                      <Square className="w-4 h-4 text-slate-600 shrink-0 mt-0.5" />
+                    )}
+                    <span className="leading-snug">{tItem}</span>
+                  </label>
+                );
+              })}
+            </div>
+
+            {/* OPSI MENAMBAHKAN TUPOKSI CUSTOM SENDIRI */}
+            <div className="pt-3 border-t border-slate-800 space-y-1.5">
+              <label className="block text-[11px] font-bold text-slate-300 uppercase">
+                + Tambah Tupoksi Custom / Manual Sendiri:
+              </label>
+              <div className="flex items-center gap-2">
+                <input
+                  type="text"
+                  placeholder="Tuliskan uraian tugas kustom tambahan di sini..."
+                  value={customTupoksiInput}
+                  onChange={(e) => setCustomTupoksiInput(e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      handleAddCustomTupoksi();
+                    }
+                  }}
+                  className="flex-1 bg-slate-900 border border-slate-800 rounded-lg px-3 py-2 text-xs text-white focus:outline-none focus:border-emerald-500"
+                />
+                <button
+                  type="button"
+                  onClick={handleAddCustomTupoksi}
+                  className="px-3 py-2 bg-emerald-500/20 hover:bg-emerald-500/30 text-emerald-300 border border-emerald-500/30 font-bold rounded-lg text-xs shrink-0 transition-colors"
+                >
+                  + Tambah
+                </button>
+              </div>
+            </div>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
@@ -448,7 +547,7 @@ export function CommitteeTab({
               type="submit"
               className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg text-sm transition-colors shadow-md shadow-emerald-500/20"
             >
-              Simpan Panitia & Dapukan
+              Simpan Panitia & Tupoksi
             </button>
           </div>
         </form>
