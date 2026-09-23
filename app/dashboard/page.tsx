@@ -75,7 +75,7 @@ import { DocumentsTab } from "@/components/command-center/DocumentsTab";
 import { ReportsTab } from "@/components/command-center/ReportsTab";
 import { MusyawarohTab } from "@/components/command-center/MusyawarohTab";
 import { EventCountdownTab } from "@/components/command-center/EventCountdownTab";
-import { Star, Trophy, Calendar, ShieldAlert, DollarSign, Package, AlertTriangle, Flame, Clock, Sliders } from "lucide-react";
+import { Star, Trophy, Calendar, ShieldAlert, DollarSign, Package, AlertTriangle, Flame, Clock, Sliders, Sparkles, UserCheck, MessageSquare, Award, Users, FileText } from "lucide-react";
 
 export default function CommandCenterDashboard() {
   const [events, setEvents] = useState<FestivalEvent[]>([DEFAULT_EVENT]);
@@ -372,6 +372,60 @@ export default function CommandCenterDashboard() {
             )}
 
             <EventHealthBanner health={eventHealth} />
+
+            {/* Quick Feature Access Launcher Grid (Zero Scroll 1-Click Access) */}
+            <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4 shadow-xl">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h3 className="font-extrabold text-white text-base flex items-center gap-2">
+                    <Sparkles className="w-5 h-5 text-emerald-400" /> FITUR UTAMA OS (1-CLICK DIRECT LAUNCHER)
+                  </h3>
+                  <p className="text-xs text-slate-400 mt-0.5">
+                    Akses instan ke seluruh modul aplikasi tanpa perlu menggeser atau mencari menu navigation bar.
+                  </p>
+                </div>
+              </div>
+
+              <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-3">
+                {[
+                  { id: "live_event", title: "LIVE EVENT & CHECK-IN", subtitle: "Monitoring Panggung & Absensi", icon: Flame, color: "border-amber-500/40 bg-amber-500/10 text-amber-300" },
+                  { id: "scoring_results", title: "HASIL & JUARA REALTIME", subtitle: "Klasemen & Rekap Pemenang Lomba", icon: Trophy, color: "border-emerald-500/40 bg-emerald-500/10 text-emerald-300" },
+                  { id: "participants", title: "PESERTA ENGINE", subtitle: "Input Data & Verifikasi Utusan", icon: UserCheck, color: "border-teal-500/40 bg-teal-500/10 text-teal-300" },
+                  { id: "musyawaroh", title: "NOTULENSI MUSYAWAROH", subtitle: "Notulensi Poin & Presensi PDF", icon: MessageSquare, color: "border-purple-500/40 bg-purple-500/10 text-purple-300" },
+                  { id: "competitions", title: "CABANG LOMBA & JUKNIS", subtitle: "Kriteria Penilaian & Kuota", icon: Award, color: "border-cyan-500/40 bg-cyan-500/10 text-cyan-300" },
+                  { id: "schedules", title: "JADWAL ENGINE", subtitle: "Manajemen Jam & Anti-Bentrok", icon: Calendar, color: "border-blue-500/40 bg-blue-500/10 text-blue-300" },
+                  { id: "judge_panel", title: "PANEL DEWAN JURI", subtitle: "Form Penilaian Live Score Tablet", icon: Star, color: "border-rose-500/40 bg-rose-500/10 text-rose-300" },
+                  { id: "finance", title: "FINANCE & KAS", subtitle: "Pencatatan Keuangan Kas", icon: DollarSign, color: "border-emerald-600/40 bg-emerald-600/10 text-emerald-400" },
+                  { id: "logistics", title: "LOGISTIK & BARANG", subtitle: "Inventaris Alat, Sound & Gedung", icon: Package, color: "border-orange-500/40 bg-orange-500/10 text-orange-300" },
+                  { id: "committee", title: "KEPANITIAAN & TUPOKSI", subtitle: "Struktur Tim & Tugas Panitia", icon: Users, color: "border-indigo-500/40 bg-indigo-500/10 text-indigo-300" },
+                  { id: "documents", title: "DOKUMEN ARSIP PDF", subtitle: "Proposal, Surat & Perizinan", icon: FileText, color: "border-sky-500/40 bg-sky-500/10 text-sky-300" },
+                  { id: "incidents", title: "LAPORAN INCIDENTS", subtitle: "Respon Cepat Kendala Lapangan", icon: AlertTriangle, color: "border-rose-600/40 bg-rose-600/10 text-rose-400" },
+                ]
+                  .filter(card => getAllowedTabsForRole(currentUser.role, eventPhaseMode).includes(card.id))
+                  .map((card) => {
+                    const Icon = card.icon;
+                    return (
+                      <button
+                        key={card.id}
+                        onClick={() => setActiveTab(card.id as any)}
+                        className="p-3.5 rounded-xl border border-slate-800 bg-slate-950/80 hover:bg-slate-900 hover:border-slate-700 transition-all text-left flex items-start gap-3 group hover:scale-[1.02] shadow-sm"
+                      >
+                        <div className={`p-2.5 rounded-lg border shrink-0 ${card.color} group-hover:scale-110 transition-transform`}>
+                          <Icon className="w-4 h-4" />
+                        </div>
+                        <div className="min-w-0 flex-1">
+                          <div className="font-extrabold text-xs text-white group-hover:text-emerald-400 transition-colors truncate">
+                            {card.title}
+                          </div>
+                          <div className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">
+                            {card.subtitle}
+                          </div>
+                        </div>
+                      </button>
+                    );
+                  })}
+              </div>
+            </div>
 
             <KpiPanel
               event={currentEvent}
