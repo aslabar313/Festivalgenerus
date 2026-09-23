@@ -46,10 +46,9 @@ import {
   DocumentItem,
   NotificationItem,
   AuditTrailItem,
-  ParticipantLifecycleStatus,
-  RegistrationStatus,
   MusyawarohItem
 } from "@/lib/types";
+import { getAllowedTabsForRole, isFullAccessRole, EventPhaseMode } from "@/lib/rbac";
 import { HeaderNav } from "@/components/command-center/HeaderNav";
 import { EventContextBar } from "@/components/command-center/EventContextBar";
 import { EventHealthBanner } from "@/components/command-center/EventHealthBanner";
@@ -75,10 +74,10 @@ import { FinanceTab } from "@/components/command-center/FinanceTab";
 import { DocumentsTab } from "@/components/command-center/DocumentsTab";
 import { ReportsTab } from "@/components/command-center/ReportsTab";
 import { MusyawarohTab } from "@/components/command-center/MusyawarohTab";
-import { Star, Trophy, Calendar, ShieldAlert, DollarSign, Package, AlertTriangle, Flame } from "lucide-react";
+import { EventCountdownTab } from "@/components/command-center/EventCountdownTab";
+import { Star, Trophy, Calendar, ShieldAlert, DollarSign, Package, AlertTriangle, Flame, Clock, Sliders } from "lucide-react";
 
 export default function CommandCenterDashboard() {
-  // State Management (Part 1 + Part 2 + Part 3 + Part 4)
   const [events, setEvents] = useState<FestivalEvent[]>([DEFAULT_EVENT]);
   const [currentEvent, setCurrentEvent] = useState<FestivalEvent>(DEFAULT_EVENT);
   const [divisions, setDivisions] = useState<Division[]>(INITIAL_DIVISIONS);
@@ -86,7 +85,6 @@ export default function CommandCenterDashboard() {
   const [tasks, setTasks] = useState<Task[]>(INITIAL_TASKS);
   const [risks, setRisks] = useState<Risk[]>(INITIAL_RISKS);
 
-  // Part 2 & Part 3 & Part 4 States
   const [competitions, setCompetitions] = useState<Competition[]>(INITIAL_COMPETITIONS);
   const [participants, setParticipants] = useState<Participant[]>(INITIAL_PARTICIPANTS);
   const [registrations, setRegistrations] = useState<Registration[]>(INITIAL_REGISTRATIONS);
@@ -103,14 +101,16 @@ export default function CommandCenterDashboard() {
   const [auditItems, setAuditItems] = useState<AuditTrailItem[]>(INITIAL_AUDIT_TRAIL);
   const [musyawarohList, setMusyawarohList] = useState<MusyawarohItem[]>(INITIAL_MUSYAWAROH);
 
-  const [activeTab, setActiveTab] = useState<
-    "dashboard" | "live_event" | "musyawaroh" | "incidents" | "judge_panel" | "scoring_results" | "schedules" | "events" | "competitions" | "participants" | "my_portal" | "divisions" | "committee" | "tasks" | "risks" | "logistics" | "finance" | "documents" | "reports" | "notifications" | "audit"
-  >("dashboard");
+  const [eventPhaseMode, setEventPhaseMode] = useState<EventPhaseMode>("REGISTRATION_OPEN");
 
   const [currentUser, setCurrentUser] = useState<{ full_name: string; role: string }>({
     full_name: "Super Admin PPG",
-    role: "Superadmin (PPG Magetan Timur)",
+    role: "superadmin",
   });
+
+  const [activeTab, setActiveTab] = useState<
+    "dashboard" | "countdown" | "live_event" | "musyawaroh" | "incidents" | "judge_panel" | "scoring_results" | "schedules" | "events" | "competitions" | "participants" | "my_portal" | "divisions" | "committee" | "tasks" | "risks" | "logistics" | "finance" | "documents" | "reports" | "notifications" | "audit"
+  >("dashboard");
 
   useEffect(() => {
     if (typeof window !== "undefined") {
@@ -120,13 +120,18 @@ export default function CommandCenterDashboard() {
           const parsed = JSON.parse(stored);
           if (parsed.full_name && parsed.role) {
             setCurrentUser({ full_name: parsed.full_name, role: parsed.role });
+            
+            const allowed = getAllowedTabsForRole(parsed.role, eventPhaseMode);
+            if (allowed.length > 0 && !allowed.includes(activeTab)) {
+              setActiveTab(allowed[0] as any);
+            }
           }
         }
       } catch (e) {
         console.error("Failed to parse fg_user from localStorage", e);
       }
     }
-  }, []);
+  }, [eventPhaseMode]);
 
   // Calculations
   const eventHealth = calculateEventHealth(tasks, risks, divisions, participants, competitionJudges, venues, inventory);
@@ -178,39 +183,34 @@ export default function CommandCenterDashboard() {
   // Handlers for Participants & Check-in
   const handleAddParticipant = (p: Participant, competitionIds: string[]) => {
     setParticipants(prev => [p, ...prev]);
-    const newRegs: Registration[] = competitionIds.map((cId, idx) => {
-      const cmp = competitions.find(c => c.id === cId);
+    const newRegs: Registration[] = competitionIds.map(cId => {
+      const comp = competitions.find(c => c.id === cId);
       return {
-        id: `reg-${Date.now()}-${idx}`,
+        id: `reg-${Date.now()}-${Math.random().toString(36).substring(2, 5)}`,
         participant_id: p.id,
         participant_name: p.name,
         competition_id: cId,
-        competition_name: cmp?.name || "Lomba",
+        competition_name: comp?.name || "Lomba",
         registration_number: `REG-2026-${Math.floor(100 + Math.random() * 900)}`,
-        status: "REGISTERED",
+        status: "APPROVED",
         payment_status: "FREE",
         registered_at: new Date().toISOString(),
       };
     });
     setRegistrations(prev => [...newRegs, ...prev]);
-    addAuditLog("Official / Peserta", "CREATED_PARTICIPANT", p.name, `Registrasi peserta baru ${p.name} (${p.group_name})`);
+    addAuditLog(currentUser.full_name, "REGISTER_PARTICIPANT", p.name, `Mendaftarkan peserta ${p.name} ke ${competitionIds.length} cabang lomba`);
   };
 
-  const handleUpdateParticipantStatus = (participantId: string, status: ParticipantLifecycleStatus) => {
-    setParticipants(prev => prev.map(p => p.id === participantId ? { ...p, status } : p));
+  const handleUpdateParticipantStatus = (id: string, status: Participant["status"]) => {
+    setParticipants(prev => prev.map(p => p.id === id ? { ...p, status } : p));
   };
 
   const handleCheckInParticipant = (participantId: string) => {
     setParticipants(prev => prev.map(p => p.id === participantId ? { ...p, status: "CHECK_IN" } : p));
-    const p = participants.find(p => p.id === participantId);
-    addAuditLog("Loket Registrasi Hari-H", "PARTICIPANT_CHECK_IN", p?.name || participantId, `Check-in fisik lokasi & penyerahan nomor dada`);
+    addAuditLog("Loket Registrasi", "CHECK_IN_PARTICIPANT", participantId, `Check-in kehadiran lokasi peserta`);
   };
 
-  const handleUpdateRegistrationStatus = (registrationId: string, status: RegistrationStatus) => {
-    setRegistrations(prev => prev.map(r => r.id === registrationId ? { ...r, status } : r));
-  };
-
-  // Handlers for Scoring & Locking
+  // Handlers for Scoring & Judges
   const handleSaveScores = (newScores: ScoreItem[]) => {
     setScores(prev => {
       const filtered = prev.filter(s => 
@@ -218,34 +218,20 @@ export default function CommandCenterDashboard() {
       );
       return [...filtered, ...newScores];
     });
-    if (newScores[0]) {
-      addAuditLog("Ustadz Kyai Kholil (Dewan Juri)", "SUBMIT_AND_LOCK_SCORE", newScores[0].competition_id, `Input skor & lock penilaian peserta`);
-    }
+    addAuditLog("Dewan Juri", "SUBMIT_SCORES", newScores[0]?.competition_id || "Lomba", `Penilaian skor juri dikirim & dikunci.`);
   };
 
   const handleUnlockScores = (competitionId: string, participantId: string) => {
-    setScores(prev => prev.map(s => {
-      if (s.competition_id === competitionId && s.participant_id === participantId) {
-        return { ...s, is_locked: false };
-      }
-      return s;
-    }));
-    addAuditLog("H. Zaki (Ketua Panitia)", "AUTHORIZED_UNLOCK_SCORE", participantId, `Membuka kunci skor untuk revisi dewan juri`);
+    setScores(prev => prev.map(s => (s.competition_id === competitionId && s.participant_id === participantId) ? { ...s, is_locked: false } : s));
+    addAuditLog(currentUser.full_name, "UNLOCK_SCORE", `${competitionId}/${participantId}`, `Superadmin membuka kunci nilai peserta`);
   };
 
-  // Handlers for Schedules & Venues
-  const handleAddSchedule = (sch: ScheduleItem) => {
-    setSchedules(prev => [...prev, sch]);
-    addAuditLog("Panitia (Acara)", "CREATED_SCHEDULE", sch.competition_name || "Lomba", `Alokasi panggung & jam tampil`);
-  };
+  // Handlers for Schedules
+  const handleAddSchedule = (sch: ScheduleItem) => setSchedules(prev => [...prev, sch]);
   const handleDeleteSchedule = (id: string) => setSchedules(prev => prev.filter(s => s.id !== id));
-  const handleAddVenue = (venue: Venue) => setVenues(prev => [...prev, venue]);
 
-  // Handlers for Part 4 (Incidents, Logistics, Finance, Documents)
-  const handleAddIncident = (inc: IncidentItem) => {
-    setIncidents(prev => [inc, ...prev]);
-    addAuditLog(inc.reported_by, "REPORT_INCIDENT", inc.title, `Laporan insiden di ${inc.location}`);
-  };
+  // Handlers for Part 4 (Incidents, Inventory, Finance, Documents)
+  const handleAddIncident = (inc: IncidentItem) => setIncidents(prev => [inc, ...prev]);
   const handleUpdateIncidentStatus = (id: string, status: IncidentItem["status"]) => {
     setIncidents(prev => prev.map(i => i.id === id ? { ...i, status, resolved_at: status === "RESOLVED" ? new Date().toISOString() : i.resolved_at } : i));
   };
@@ -307,14 +293,67 @@ export default function CommandCenterDashboard() {
         userName={currentUser.full_name}
         unreadCount={unreadNotifCount}
         conflictCount={conflicts.length}
+        eventPhaseMode={eventPhaseMode}
       />
 
       {/* Main Container */}
       <main className="flex-1 max-w-7xl w-full mx-auto px-4 sm:px-6 lg:px-8 py-6 space-y-6">
-        {/* Event Context Header */}
-        <EventContextBar event={currentEvent} />
+        {/* Event Context Header & Phase Switcher */}
+        <div className="space-y-3">
+          <EventContextBar event={currentEvent} />
 
-        {/* Tab 1: Command Center Dashboard (FINAL CEO DASHBOARD FORMAT) */}
+          {/* Phase Control Bar for Admin / Organizers */}
+          {isFullAccessRole(currentUser.role) && (
+            <div className="bg-slate-900/80 border border-slate-800 p-3 rounded-xl flex items-center justify-between gap-4 text-xs">
+              <div className="flex items-center gap-2 text-slate-300 font-semibold">
+                <Sliders className="w-4 h-4 text-emerald-400" /> Mode Alur Pendaftaran & Event:
+              </div>
+              <div className="flex items-center gap-2">
+                <button
+                  onClick={() => setEventPhaseMode("REGISTRATION_OPEN")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
+                    eventPhaseMode === "REGISTRATION_OPEN"
+                      ? "bg-emerald-500 text-slate-950 shadow-md shadow-emerald-500/20"
+                      : "bg-slate-950 text-slate-400 border border-slate-800 hover:text-white"
+                  }`}
+                >
+                  1. Pendaftaran Buka
+                </button>
+                <button
+                  onClick={() => setEventPhaseMode("COUNTDOWN_ONLY")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
+                    eventPhaseMode === "COUNTDOWN_ONLY"
+                      ? "bg-amber-500 text-slate-950 shadow-md shadow-amber-500/20"
+                      : "bg-slate-950 text-slate-400 border border-slate-800 hover:text-white"
+                  }`}
+                >
+                  2. Pendaftaran Tutup (Countdown)
+                </button>
+                <button
+                  onClick={() => setEventPhaseMode("EVENT_DAY_LIVE")}
+                  className={`px-3 py-1.5 rounded-lg font-bold transition-colors ${
+                    eventPhaseMode === "EVENT_DAY_LIVE"
+                      ? "bg-teal-400 text-slate-950 shadow-md shadow-teal-400/20"
+                      : "bg-slate-950 text-slate-400 border border-slate-800 hover:text-white"
+                  }`}
+                >
+                  3. Hari-H (Live Score)
+                </button>
+              </div>
+            </div>
+          )}
+        </div>
+
+        {/* Tab Countdown View for Admin Kelompok & Admin Desa */}
+        {activeTab === "countdown" && (
+          <EventCountdownTab
+            event={currentEvent}
+            userRole={currentUser.role}
+            userName={currentUser.full_name}
+          />
+        )}
+
+        {/* Tab 1: Command Center Dashboard */}
         {activeTab === "dashboard" && (
           <div className="space-y-6 animate-fade-in">
             {conflicts.length > 0 && (
@@ -332,7 +371,6 @@ export default function CommandCenterDashboard() {
               </div>
             )}
 
-            {/* 1. EVENT HEALTH & READINESS */}
             <EventHealthBanner health={eventHealth} />
 
             <KpiPanel
@@ -343,40 +381,7 @@ export default function CommandCenterDashboard() {
               competitions={competitions}
             />
 
-            {/* 2. WHAT NEEDS MY ATTENTION? */}
             <ActionNeededPanel items={actionItems} onNavigateTab={handleNavigateTab} />
-
-            {/* 3. CURRENT & NEXT EVENT (LIVE OPERATIONAL QUICK BAR) */}
-            <div className="bg-slate-900 border border-slate-800 p-6 rounded-2xl space-y-4">
-              <div className="flex items-center justify-between">
-                <h3 className="font-bold text-white text-base flex items-center gap-2">
-                  <Flame className="w-5 h-5 text-emerald-400" /> Operational Hari-H & Incidents
-                </h3>
-                <button onClick={() => setActiveTab("live_event")} className="text-xs text-emerald-400 hover:underline font-semibold">
-                  Buka Live Event OS &rarr;
-                </button>
-              </div>
-
-              <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs">
-                <div className="bg-slate-950 p-4 rounded-xl border border-emerald-500/30">
-                  <span className="text-[10px] font-bold text-emerald-400 uppercase">CURRENT RUNNING</span>
-                  <div className="font-bold text-white text-sm mt-1">Tahfidz Juz 30 (Round 2)</div>
-                  <div className="text-slate-400">Panggung Utama Gedung A</div>
-                </div>
-
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-                  <span className="text-[10px] font-bold text-teal-400 uppercase">NEXT UP (10:30 WIB)</span>
-                  <div className="font-bold text-white text-sm mt-1">Lomba Adzan & Iqamah</div>
-                  <div className="text-slate-400">Masjid Agung Generus Area 1</div>
-                </div>
-
-                <div className="bg-slate-950 p-4 rounded-xl border border-slate-800">
-                  <span className="text-[10px] font-bold text-amber-400 uppercase">FINANCE BALANCE KAS</span>
-                  <div className="font-bold text-amber-400 text-base font-mono mt-1">Rp 23.500.000</div>
-                  <div className="text-slate-400">Terverifikasi Bendahara</div>
-                </div>
-              </div>
-            </div>
           </div>
         )}
 
@@ -448,7 +453,7 @@ export default function CommandCenterDashboard() {
             registrations={registrations}
             onAddSchedule={handleAddSchedule}
             onDeleteSchedule={handleDeleteSchedule}
-            onAddVenue={handleAddVenue}
+            onAddVenue={(v) => setVenues(prev => [...prev, v])}
           />
         )}
 
@@ -462,15 +467,15 @@ export default function CommandCenterDashboard() {
           />
         )}
 
-        {/* Tab 8: Participants */}
+        {/* Tab 8: Participants Engine */}
         {activeTab === "participants" && (
           <ParticipantsTab
             participants={participants}
-            registrations={registrations}
             competitions={competitions}
+            registrations={registrations}
             onAddParticipant={handleAddParticipant}
             onUpdateParticipantStatus={handleUpdateParticipantStatus}
-            onUpdateRegistrationStatus={handleUpdateRegistrationStatus}
+            onUpdateRegistrationStatus={(rId, status) => setRegistrations(prev => prev.map(r => r.id === rId ? { ...r, status } : r))}
           />
         )}
 
@@ -483,10 +488,11 @@ export default function CommandCenterDashboard() {
           />
         )}
 
-        {/* Tab 10: Finance */}
+        {/* Tab 10: Finance (Kas) */}
         {activeTab === "finance" && (
           <FinanceTab
             transactions={transactions}
+            userRole={currentUser.role}
             onAddTransaction={handleAddTransaction}
             onApproveTransaction={handleApproveTransaction}
           />

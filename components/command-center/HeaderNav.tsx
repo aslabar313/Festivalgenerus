@@ -24,9 +24,11 @@ import {
   Package,
   DollarSign,
   FileSpreadsheet,
-  MessageSquare
+  MessageSquare,
+  Clock
 } from "lucide-react";
 import { FestivalEvent } from "@/lib/types";
+import { getAllowedTabsForRole, EventPhaseMode } from "@/lib/rbac";
 
 interface HeaderNavProps {
   currentEvent: FestivalEvent;
@@ -38,6 +40,8 @@ interface HeaderNavProps {
   userName?: string;
   unreadCount?: number;
   conflictCount?: number;
+  eventPhaseMode?: EventPhaseMode;
+  onPhaseChange?: (phase: EventPhaseMode) => void;
 }
 
 export function HeaderNav({
@@ -46,16 +50,19 @@ export function HeaderNav({
   onSelectEvent,
   activeTab,
   setActiveTab,
-  userRole = "Ketua Panitia",
-  userName = "H. Zaki",
-  unreadCount = 1,
+  userRole = "Super Admin",
+  userName = "Superadmin",
+  unreadCount = 0,
   conflictCount = 0,
+  eventPhaseMode = "REGISTRATION_OPEN",
+  onPhaseChange,
 }: HeaderNavProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [eventDropdownOpen, setEventDropdownOpen] = useState(false);
 
-  const navItems = [
+  const allNavItems = [
     { id: "dashboard", label: "Command Center", icon: LayoutDashboard },
+    { id: "countdown", label: "Countdown Event", icon: Clock },
     { id: "live_event", label: "LIVE EVENT (H)", icon: Flame, highlight: true },
     { id: "musyawaroh", label: "Musyawaroh / Notulensi", icon: MessageSquare },
     { id: "committee", label: "Kepanitiaan & Tupoksi", icon: Users },
@@ -70,6 +77,9 @@ export function HeaderNav({
     { id: "documents", label: "Dokumen", icon: FileText },
     { id: "reports", label: "Reports (LPJ)", icon: FileSpreadsheet },
   ];
+
+  const allowedTabs = getAllowedTabsForRole(userRole, eventPhaseMode);
+  const navItems = allNavItems.filter(item => allowedTabs.includes(item.id));
 
   return (
     <header className="bg-slate-900 border-b border-slate-800 sticky top-0 z-40">
@@ -134,7 +144,7 @@ export function HeaderNav({
         </div>
 
         {/* Desktop Navigation Items */}
-        <nav className="hidden 2xl:flex items-center gap-1">
+        <nav className="hidden xl:flex items-center gap-1 overflow-x-auto max-w-xl py-1">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
@@ -142,7 +152,7 @@ export function HeaderNav({
               <button
                 key={item.id}
                 onClick={() => setActiveTab(item.id)}
-                className={`flex items-center gap-1.5 px-2 py-1.5 rounded-lg text-xs font-semibold transition-all relative ${
+                className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-lg text-xs font-semibold whitespace-nowrap transition-all relative ${
                   item.highlight
                     ? "bg-emerald-500 text-slate-950 font-black shadow-md shadow-emerald-500/30"
                     : isActive
@@ -172,7 +182,7 @@ export function HeaderNav({
           <Link
             href="/login"
             className="p-2 bg-slate-950 hover:bg-slate-800 border border-slate-800 rounded-lg text-slate-400 hover:text-rose-400 transition-colors"
-            title="Sign Out"
+            title="Keluar / Ganti Akun"
           >
             <LogOut className="w-4 h-4" />
           </Link>
@@ -180,7 +190,7 @@ export function HeaderNav({
           {/* Mobile Menu Toggle */}
           <button
             onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-            className="2xl:hidden p-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-300 hover:text-white"
+            className="xl:hidden p-2 bg-slate-950 border border-slate-800 rounded-lg text-slate-300 hover:text-white"
           >
             {mobileMenuOpen ? <X className="w-5 h-5" /> : <Menu className="w-5 h-5" />}
           </button>
@@ -189,7 +199,7 @@ export function HeaderNav({
 
       {/* Mobile Drawer Menu */}
       {mobileMenuOpen && (
-        <div className="2xl:hidden bg-slate-900 border-b border-slate-800 px-4 py-3 space-y-1 max-h-[80vh] overflow-y-auto">
+        <div className="xl:hidden bg-slate-900 border-b border-slate-800 px-4 py-3 space-y-1 max-h-[80vh] overflow-y-auto">
           {navItems.map((item) => {
             const Icon = item.icon;
             const isActive = activeTab === item.id;
