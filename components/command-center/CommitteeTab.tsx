@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { CommitteeMember, CommitteeRole, Division } from "@/lib/types";
-import { Users, Plus, ShieldCheck, Mail, Phone, Building, CheckSquare, Edit, Trash2, BookOpen, Layers, LayoutGrid, List } from "lucide-react";
+import { Users, Plus, ShieldCheck, Phone, Building, CheckSquare, Edit, Trash2, BookOpen, Layers, LayoutGrid, List } from "lucide-react";
 import { Modal } from "@/components/ui/modal";
 
 interface CommitteeTabProps {
@@ -12,6 +12,62 @@ interface CommitteeTabProps {
   onUpdateMember: (member: CommitteeMember) => void;
   onDeleteMember: (id: string) => void;
 }
+
+export const DAPUKAN_OPTIONS = [
+  "wakil ketua",
+  "pengawas",
+  "sekretaris",
+  "bendahara",
+  "Konsumsi",
+  "Sarana Prasarana",
+  "Pembuat Soal & Koor Juri",
+  "Hadiah & Piala",
+  "Dokumentasi",
+  "Pembantu Umum",
+];
+
+export const TUPOKSI_MAP: Record<string, string[]> = {
+  "wakil ketua": [
+    "Mendampingi Ketua Utama, memimpin jalannya koordinasi antar divisi, dan mengambil keputusan operasional saat Ketua berhalangan.",
+    "Memantau pelaksanaan kegiatan seluruh divisi panitia dan memastikan kesiapan Hari-H."
+  ],
+  "pengawas": [
+    "Mengawasi pelaksanaan kegiatan agar sesuai juknis, tata tertib, dan mengontrol ketertiban serta kelancaran acara.",
+    "Melakukan audit kesiapan venue, keabsahan berkas lomba, dan kepatuhan prosedur event."
+  ],
+  "sekretaris": [
+    "Mengelola administrasi perizinan, persuratan resmi, notulensi musyawaroh pimpinan, dan registrasi dokumen.",
+    "Menyusun sertifikat kejuaraan, prasasti event, dan mengarsipkan dokumen resmi kegiatan."
+  ],
+  "bendahara": [
+    "Pencatatan kas masuk & keluar, verifikasi nota pengeluaran operasional divisi, dan pembuatan LPJ Keuangan.",
+    "Pengelolaan dana tak terduga, alokasi anggaran konsumsi & hadiah, serta pencatatan donasi."
+  ],
+  "Konsumsi": [
+    "Penyediaan dan penataan konsumsi untuk Panitia, Dewan Juri, Tamu Undangan, dan Peserta.",
+    "Mengatur jadwal pembagian konsumsi tepat waktu dan menjaga kebersihan area konsumsi."
+  ],
+  "Sarana Prasarana": [
+    "Penataan tempat panggung, penyediaan sound system, genset cadangan 10KVA, kursi, dan tenda venue.",
+    "Inventarisasi alat perlengkapan event, pengecekan instalasi kelistrikan, serta kelengkapan fisik panggung."
+  ],
+  "Pembuat Soal & Koor Juri": [
+    "Penyusunan naskah soal perlombaan, pembekalan dewan juri, penentuan kriteria penilaian, dan pengawalan penilaian live score.",
+    "Verifikasi kesiapan lembar penilaian juri, perekapan nilai akhir, dan penyerahan daftar juara ke panitia."
+  ],
+  "Hadiah & Piala": [
+    "Pengadaan tropi piala kejuaraan, piagam penghargaan, penyiapan hadiah pemenang, dan pendampingan prosesi penganugerahan di panggung.",
+    "Pengecekan fisik trophy, pembungkusan hadiah, dan koordinasi urutan pemanggilan juara saat penutupan."
+  ],
+  "Dokumentasi": [
+    "Pengambilan foto/video kegiatan, pengelolaan live streaming panggung, dan pembuatan video dokumentasi event.",
+    "Pengumpulan aset visual untuk laporan kegiatan dan pengarsipan materi liputan event."
+  ],
+  "Pembantu Umum": [
+    "Membantu mobilisasi umum lapangan, membantu kebersihan tempat, dan membantu tugas mendesak seluruh divisi.",
+    "Penanganan bantuan logistik cepat, kesiapan perlengkapan darurat, dan koordinasi umum di lokasi."
+  ]
+};
 
 export function CommitteeTab({
   committee,
@@ -26,21 +82,36 @@ export function CommitteeTab({
 
   // Form State
   const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
-  const [role, setRole] = useState<CommitteeRole>("panitia");
-  const [positionTitle, setPositionTitle] = useState("");
-  const [tupoksi, setTupoksi] = useState("");
+  const [dapukan, setDapukan] = useState(DAPUKAN_OPTIONS[0]);
+  const [tupoksi, setTupoksi] = useState(TUPOKSI_MAP[DAPUKAN_OPTIONS[0]][0]);
   const [divisionId, setDivisionId] = useState("");
+
+  const handleDapukanChange = (newDapukan: string) => {
+    setDapukan(newDapukan);
+    const availableTupoksi = TUPOKSI_MAP[newDapukan] || [];
+    if (availableTupoksi.length > 0) {
+      setTupoksi(availableTupoksi[0]);
+    } else {
+      setTupoksi("");
+    }
+  };
+
+  const mapDapukanToRole = (dap: string): CommitteeRole => {
+    const d = dap.toLowerCase();
+    if (d.includes("ketua")) return "ketua";
+    if (d.includes("sekretaris")) return "sekretaris";
+    if (d.includes("bendahara")) return "bendahara";
+    if (d.includes("pengawas")) return "ketua";
+    return "panitia";
+  };
 
   const handleOpenAdd = () => {
     setEditingMember(null);
     setName("");
-    setEmail("");
     setPhone("");
-    setRole("panitia");
-    setPositionTitle("");
-    setTupoksi("");
+    setDapukan(DAPUKAN_OPTIONS[0]);
+    setTupoksi(TUPOKSI_MAP[DAPUKAN_OPTIONS[0]][0]);
     setDivisionId("");
     setIsModalOpen(true);
   };
@@ -48,11 +119,10 @@ export function CommitteeTab({
   const handleOpenEdit = (m: CommitteeMember) => {
     setEditingMember(m);
     setName(m.name);
-    setEmail(m.email);
     setPhone(m.phone || "");
-    setRole(m.role);
-    setPositionTitle(m.position_title || "");
-    setTupoksi(m.tupoksi || "");
+    const initialDapukan = m.position_title && DAPUKAN_OPTIONS.includes(m.position_title) ? m.position_title : DAPUKAN_OPTIONS[0];
+    setDapukan(initialDapukan);
+    setTupoksi(m.tupoksi || (TUPOKSI_MAP[initialDapukan]?.[0] || ""));
     setDivisionId(m.division_id || "");
     setIsModalOpen(true);
   };
@@ -60,15 +130,16 @@ export function CommitteeTab({
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const selectedDiv = divisions.find(d => d.id === divisionId);
+    const calculatedRole = mapDapukanToRole(dapukan);
 
     if (editingMember) {
       onUpdateMember({
         ...editingMember,
         name,
-        email,
+        email: `${name.toLowerCase().replace(/\s+/g, "")}@generus.id`,
         phone,
-        role,
-        position_title: positionTitle || getDefaultPositionTitle(role, selectedDiv?.name),
+        role: calculatedRole,
+        position_title: dapukan,
         tupoksi,
         division_id: divisionId,
         division_name: selectedDiv?.name,
@@ -78,10 +149,10 @@ export function CommitteeTab({
         id: `com-${Date.now()}`,
         event_id: "evt-fg2026",
         name,
-        email,
+        email: `${name.toLowerCase().replace(/\s+/g, "")}@generus.id`,
         phone,
-        role,
-        position_title: positionTitle || getDefaultPositionTitle(role, selectedDiv?.name),
+        role: calculatedRole,
+        position_title: dapukan,
         tupoksi,
         division_id: divisionId,
         division_name: selectedDiv?.name,
@@ -92,30 +163,16 @@ export function CommitteeTab({
     setIsModalOpen(false);
   };
 
-  const getDefaultPositionTitle = (r: CommitteeRole, divName?: string) => {
-    switch (r) {
-      case "ketua": return "Ketua Panitia";
-      case "sekretaris": return "Sekretaris Utama";
-      case "bendahara": return "Bendahara Utama";
-      case "koordinator": return `Koordinator Divisi ${divName || ""}`;
-      default: return `Panitia Divisi ${divName || "Umum"}`;
-    }
+  const getRoleBadge = (posTitle?: string) => {
+    const p = (posTitle || "").toLowerCase();
+    if (p.includes("ketua") || p.includes("pengawas")) return "bg-purple-500/20 text-purple-300 border-purple-500/40";
+    if (p.includes("sekretaris")) return "bg-cyan-500/20 text-cyan-300 border-cyan-500/40";
+    if (p.includes("bendahara")) return "bg-amber-500/20 text-amber-300 border-amber-500/40";
+    if (p.includes("juri") || p.includes("soal")) return "bg-rose-500/20 text-rose-300 border-rose-500/40";
+    return "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
   };
 
-  const getRoleBadge = (r: CommitteeRole) => {
-    switch (r) {
-      case "ketua":
-        return "bg-purple-500/20 text-purple-300 border-purple-500/40";
-      case "sekretaris":
-        return "bg-cyan-500/20 text-cyan-300 border-cyan-500/40";
-      case "bendahara":
-        return "bg-amber-500/20 text-amber-300 border-amber-500/40";
-      case "koordinator":
-        return "bg-teal-500/20 text-teal-300 border-teal-500/40";
-      default:
-        return "bg-emerald-500/20 text-emerald-300 border-emerald-500/40";
-    }
-  };
+  const availableTupoksiOptions = TUPOKSI_MAP[dapukan] || [];
 
   return (
     <div className="space-y-6">
@@ -123,10 +180,10 @@ export function CommitteeTab({
       <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4 bg-slate-900 border border-slate-800 p-6 rounded-2xl">
         <div>
           <h2 className="text-xl font-bold text-white flex items-center gap-2">
-            <Users className="w-5 h-5 text-emerald-400" /> Fitur Kepanitiaan & Structure Customizer
+            <Users className="w-5 h-5 text-emerald-400" /> Fitur Kepanitiaan & Structure Customizer (Dapukan)
           </h2>
           <p className="text-xs text-slate-400 mt-1">
-            Atur struktur susunan kepanitiaan, nama personel, seksi/divisi, serta Tupoksi (Tugas Pokok & Fungsi) yang dapat disesuaikan secara bebas.
+            Atur struktur susunan kepanitiaan, nama personel, Dapukan (Jabatan Panitia), serta Tupoksi (Tugas Pokok & Fungsi) yang tersambung secara otomatis.
           </p>
         </div>
 
@@ -173,12 +230,12 @@ export function CommitteeTab({
                     </div>
                     <div>
                       <h3 className="font-bold text-white text-sm">{m.name}</h3>
-                      <p className="text-xs text-emerald-400 font-semibold">{m.position_title || getDefaultPositionTitle(m.role, m.division_name)}</p>
+                      <p className="text-xs text-emerald-400 font-semibold">{m.position_title || "Panitia"}</p>
                     </div>
                   </div>
 
-                  <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border shrink-0 ${getRoleBadge(m.role)}`}>
-                    {m.role}
+                  <span className={`px-2.5 py-1 rounded-md text-[10px] font-bold uppercase tracking-wider border shrink-0 ${getRoleBadge(m.position_title)}`}>
+                    {m.position_title || "Panitia"}
                   </span>
                 </div>
 
@@ -203,14 +260,14 @@ export function CommitteeTab({
               <div className="pt-3 border-t border-slate-800 flex items-center justify-between text-xs text-slate-400">
                 <div className="flex items-center gap-2">
                   <Phone className="w-3.5 h-3.5 text-slate-500" />
-                  <span>{m.phone || m.email}</span>
+                  <span>{m.phone || "Kontak Panitia"}</span>
                 </div>
 
                 <div className="flex items-center gap-1">
                   <button
                     onClick={() => handleOpenEdit(m)}
                     className="p-1.5 text-slate-400 hover:text-emerald-400 hover:bg-slate-800 rounded-lg transition-colors"
-                    title="Edit Panitia & Tupoksi"
+                    title="Edit Panitia & Dapukan"
                   >
                     <Edit className="w-4 h-4" />
                   </button>
@@ -236,7 +293,7 @@ export function CommitteeTab({
               <thead className="bg-slate-950 text-slate-400 uppercase tracking-wider font-semibold border-b border-slate-800">
                 <tr>
                   <th className="py-3.5 px-4">Anggota Panitia</th>
-                  <th className="py-3.5 px-4">Jabatan Kustom</th>
+                  <th className="py-3.5 px-4">Dapukan (Posisi)</th>
                   <th className="py-3.5 px-4">Tupoksi (Fungsi Kerja)</th>
                   <th className="py-3.5 px-4">Divisi</th>
                   <th className="py-3.5 px-4 text-right">Aksi</th>
@@ -252,15 +309,15 @@ export function CommitteeTab({
                         </div>
                         <div>
                           <div>{m.name}</div>
-                          <div className="text-[10px] text-slate-500 font-normal">{m.email}</div>
+                          <div className="text-[10px] text-slate-500 font-normal">{m.phone || "No HP"}</div>
                         </div>
                       </div>
                     </td>
 
                     <td className="py-3.5 px-4">
-                      <div className="font-semibold text-slate-200">{m.position_title || getDefaultPositionTitle(m.role, m.division_name)}</div>
-                      <span className={`inline-block mt-0.5 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${getRoleBadge(m.role)}`}>
-                        {m.role}
+                      <div className="font-semibold text-slate-200">{m.position_title || "Panitia"}</div>
+                      <span className={`inline-block mt-0.5 px-2 py-0.5 rounded text-[9px] font-bold uppercase tracking-wider border ${getRoleBadge(m.position_title)}`}>
+                        {m.position_title || "Panitia"}
                       </span>
                     </td>
 
@@ -310,7 +367,7 @@ export function CommitteeTab({
       <Modal
         isOpen={isModalOpen}
         onClose={() => setIsModalOpen(false)}
-        title={editingMember ? "Edit Panitia & Tupoksi" : "Tambah Panitia Baru"}
+        title={editingMember ? "Edit Panitia & Dapukan" : "Tambah Panitia Baru"}
       >
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -318,79 +375,60 @@ export function CommitteeTab({
             <input
               type="text"
               required
-              placeholder="Ahmad Fulan"
+              placeholder="misal: Ahmad Fulan"
               value={name}
               onChange={(e) => setName(e.target.value)}
               className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
             />
           </div>
 
-          <div className="grid grid-cols-2 gap-3">
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Jabatan / Judul Posisi</label>
-              <input
-                type="text"
-                placeholder="misal: Sekretaris 1 / Sie Konsumsi"
-                value={positionTitle}
-                onChange={(e) => setPositionTitle(e.target.value)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Role / Peran Hirarki</label>
-              <select
-                value={role}
-                onChange={(e) => setRole(e.target.value as CommitteeRole)}
-                className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
-              >
-                <option value="ketua">Ketua</option>
-                <option value="sekretaris">Sekretaris</option>
-                <option value="bendahara">Bendahara</option>
-                <option value="koordinator">Koordinator</option>
-                <option value="panitia">Panitia Pelaksana</option>
-              </select>
-            </div>
-          </div>
-
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Divisi Penugasan</label>
+            <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Dapukan (Jabatan Panitia)</label>
             <select
-              value={divisionId}
-              onChange={(e) => setDivisionId(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
+              value={dapukan}
+              onChange={(e) => handleDapukanChange(e.target.value)}
+              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white font-bold focus:outline-none focus:border-emerald-500"
             >
-              <option value="">-- Inti / Pimpinan Non-Divisi --</option>
-              {divisions.map((d) => (
-                <option key={d.id} value={d.id}>
-                  Divisi {d.name}
+              {DAPUKAN_OPTIONS.map((dap) => (
+                <option key={dap} value={dap}>
+                  {dap}
                 </option>
               ))}
             </select>
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Tupoksi (Tugas Pokok & Fungsi)</label>
-            <textarea
-              rows={3}
-              placeholder="Jelaskan uraian tugas dan tanggung jawab posisi panitia ini..."
+            <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">
+              Tupoksi (Otomatis Sesuai Dapukan "{dapukan}")
+            </label>
+            <select
               value={tupoksi}
               onChange={(e) => setTupoksi(e.target.value)}
-              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
-            />
+              className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-xs text-emerald-300 focus:outline-none focus:border-emerald-500 leading-relaxed"
+            >
+              {availableTupoksiOptions.map((tup, idx) => (
+                <option key={idx} value={tup}>
+                  Pilihan {idx + 1}: {tup}
+                </option>
+              ))}
+            </select>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Email</label>
-              <input
-                type="email"
-                required
-                placeholder="ahmad@generus.id"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
+              <label className="block text-xs font-semibold text-slate-300 uppercase mb-1">Divisi Penugasan</label>
+              <select
+                value={divisionId}
+                onChange={(e) => setDivisionId(e.target.value)}
                 className="w-full bg-slate-950 border border-slate-800 rounded-lg p-2.5 text-sm text-white focus:outline-none focus:border-emerald-500"
-              />
+              >
+                <option value="">-- Inti / Pimpinan Non-Divisi --</option>
+                {divisions.map((d) => (
+                  <option key={d.id} value={d.id}>
+                    Divisi {d.name}
+                  </option>
+                ))}
+              </select>
             </div>
 
             <div>
@@ -410,7 +448,7 @@ export function CommitteeTab({
               type="submit"
               className="px-5 py-2.5 bg-emerald-500 hover:bg-emerald-400 text-slate-950 font-bold rounded-lg text-sm transition-colors shadow-md shadow-emerald-500/20"
             >
-              Simpan Panitia & Tupoksi
+              Simpan Panitia & Dapukan
             </button>
           </div>
         </form>
