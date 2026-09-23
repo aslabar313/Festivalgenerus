@@ -323,6 +323,14 @@ export interface EventHealthDetails {
   reasons: ReadinessFactor[];
 }
 
+export interface MusyawarohTopic {
+  id: string;
+  topic_title: string;
+  discussion?: string;
+  decision?: string;
+  assigned_division_name?: string;
+}
+
 export interface MusyawarohItem {
   id: string;
   event_id: string;
@@ -333,9 +341,11 @@ export interface MusyawarohItem {
   notulis_name: string;
   attendees_count: number;
   attendees_list?: string;
-  agenda: string;
-  results_summary: string;
-  decisions: string[];
+  attendees_ids?: string[];
+  bahan_musyawaroh: MusyawarohTopic[];
+  agenda?: string;
+  results_summary?: string;
+  decisions?: string[];
   assigned_tasks_count?: number;
   created_by?: string;
   created_at: string;
